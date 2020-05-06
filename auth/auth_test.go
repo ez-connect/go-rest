@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ez-connect/golang-rest/core"
 	"github.com/stretchr/testify/assert"
 )
 
