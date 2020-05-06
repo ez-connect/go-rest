@@ -1,7 +1,7 @@
 package rest
 
 import (
-	"github.com/ez-connect/golang-rest/db"
+	"github.com/ez-connect/go-rest/db"
 	"github.com/labstack/echo/v4"
 )
 

@@ -5,7 +5,6 @@ go 1.14
 require (
 	github.com/casbin/casbin/v2 v2.4.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/ez-connect/golang-rest v0.1.0
 	github.com/klauspost/compress v1.10.5 // indirect
 	github.com/labstack/echo/v4 v4.1.16
 	github.com/pkg/errors v0.9.1 // indirect
