@@ -1,0 +1,11 @@
+{
+  "editor.tabSize": 4,
+  // When enabled, will trim trailing whitespace when saving a file.
+  "files.trimTrailingWhitespace": true,
+  "editor.definitionLinkOpensInPeek": true,
+  "go.lintTool": "golangci-lint",
+  "go.lintFlags": [
+    "--fast",
+    "--print-issued-lines=true"
+  ]
+}
