@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ez-conne/golang-rest/rest"
+	"github.com/ez-connect/golang-rest/rest"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 )

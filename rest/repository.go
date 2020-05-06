@@ -1,6 +1,6 @@
 package rest
 
-import "github.com/ez-conne/golang-rest/db"
+import "github.com/ez-connect/golang-rest/db"
 
 type RepositoryBase struct {
 	Driver db.DatabaseBase
