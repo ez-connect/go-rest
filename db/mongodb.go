@@ -7,6 +7,7 @@ import (
 	"log"
 	"sync"
 
+	"github.com/google/go-cmp/cmp"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -212,6 +213,9 @@ func (db *MongoDb) DeleteMany(collection string, filter interface{}) (interface{
 }
 
 func (db *MongoDb) Count(collection string, filter interface{}) (int64, error) {
+	if cmp.Equal(filter, bson.M{}) {
+		return db.getCollection(collection).EstimatedDocumentCount(context.TODO())
+	}
 	return db.getCollection(collection).CountDocuments(context.TODO(), filter)
 }
 
