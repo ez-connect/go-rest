@@ -76,7 +76,7 @@ func (s *SMTP) LoginAuth(username, password string) smtp.Auth {
 
 // Connect to the server, authenticate, set the sender and recipient,
 // and send the email all in one step
-func (s *SMTP) Send(from string, to string, subject, body string) error {
+func (s *SMTP) Send(from string, subject, body string, to string, toAddressess []string) error {
 	addr := fmt.Sprintf("%s:%v", s.config.Server, s.config.Port)
 	// Set up authentication information
 	smptAuth = s.LoginAuth(
@@ -95,7 +95,7 @@ func (s *SMTP) Send(from string, to string, subject, body string) error {
 		addr,
 		smptAuth,
 		from,
-		[]string{"thanh.vinh@hotmail.com"},
+		toAddressess,
 		[]byte(msg),
 	)
 }
