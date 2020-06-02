@@ -117,7 +117,7 @@ func (h *HandlerBase) UpdateOne(c echo.Context,
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	res, err := h.db.UpdateOne(h.collection, filter, doc)
+	res, err := h.db.UpdateOne(h.collection, filter, bson.M{"$set": doc})
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}

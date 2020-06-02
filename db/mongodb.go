@@ -205,8 +205,13 @@ func (db *MongoDb) InsertMany(collection string, docs []interface{}) ([]interfac
 }
 
 func (db *MongoDb) UpdateOne(collection string, filter interface{},
-	doc interface{}) (interface{}, error) {
-	return db.getCollection(collection).UpdateOne(context.TODO(), filter, bson.M{"$set": doc})
+	update interface{}) (interface{}, error) {
+	return db.getCollection(collection).UpdateOne(context.TODO(), filter, update)
+}
+
+func (db *MongoDb) UpdateMany(collection string, filter interface{},
+	update interface{}) (interface{}, error) {
+	return db.getCollection(collection).UpdateMany(context.TODO(), filter, update)
 }
 
 func (db *MongoDb) DeleteOne(collection string, filter interface{}) (interface{}, error) {
