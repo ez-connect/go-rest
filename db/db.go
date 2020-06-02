@@ -8,6 +8,7 @@ type DatabaseBase interface {
 	Init(config interface{}) error
 	Connect()
 	Close()
+	GetClient() interface{}
 	GetCursor(collection string,
 		filter, sort interface{}, skip, limit int64,
 		projection interface{}) (interface{}, error)

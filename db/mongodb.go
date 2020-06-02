@@ -92,6 +92,11 @@ func (db *MongoDb) Close() {
 	}
 }
 
+// Returns the current session, *mongo.Client
+func (db *MongoDb) GetClient() interface{} {
+	return db.session
+}
+
 func (db *MongoDb) GetCursor(collection string,
 	filter, sort interface{},
 	skip, limit int64,
