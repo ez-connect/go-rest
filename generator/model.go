@@ -12,8 +12,8 @@ func GenerateModel(packageName string, config ModelConfig) string {
 
 	buf = append(buf, "import (")
 	buf = append(buf, "\t\"time\"\n")
-	buf = append(buf, "\t\"go.mongodb.org/mongo-driver/bson\"\n")
-	buf = append(buf, "\t\"go.mongodb.org/mongo-driver/bson/primitive\"\n")
+	buf = append(buf, "\t\"go.mongodb.org/mongo-driver/bson\"")
+	buf = append(buf, "\t\"go.mongodb.org/mongo-driver/bson/primitive\"")
 	buf = append(buf, ")\n")
 
 	buf = append(buf, "type Model struct {")
