@@ -3,7 +3,7 @@ package auth
 import (
 	"context"
 
-	firebase "firebase.google.com/go/auth"
+	firebase "firebase.google.com/go/v4/auth"
 	"github.com/ez-connect/go-rest/core"
 )
 
