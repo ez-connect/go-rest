@@ -1,14 +1,15 @@
 package generator
 
 type Attribute struct {
-	Name     string
-	Type     string
-	Required bool
+	Name     string `yaml:"name"`
+	Type     string `yaml:"type"`
+	Required bool   `yaml:"required"`
 }
 
 type ModelConfig struct {
 	// Collection name
-	Name string
+	Name string `yaml:"name"`
+
 	// All attributes
-	Attributes []Attribute
+	Attributes []Attribute `yaml:"attributes"`
 }
