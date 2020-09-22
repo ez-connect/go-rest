@@ -1,17 +1,19 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
+	"os/exec"
 
 	"github.com/ez-connect/go-rest/core"
 	"github.com/ez-connect/go-rest/generator"
 )
 
 func main() {
-	workingDir := "example"
+	workingDir := "./example"
 	fmt.Println("Working dir:", workingDir)
 
 	dirs, err := ioutil.ReadDir(fmt.Sprintf("%s/routes", workingDir))
@@ -40,5 +42,13 @@ func main() {
 			generator.GenerateFile(workingDir, dir.Name(), "router", config)
 
 		}
+	}
+
+	// format code
+	cmd := exec.Command("golangci-lint", "run", "--fix", "--disable-all", "--enable", "goimports", workingDir+"/...")
+	var er bytes.Buffer
+	cmd.Stderr = &er
+	if err = cmd.Run(); err != nil {
+		fmt.Println("lint error: ", er.String())
 	}
 }
