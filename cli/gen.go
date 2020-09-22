@@ -13,19 +13,19 @@ import (
 )
 
 func main() {
-	workingDir := "./example"
+	workingDir := "."
 	fmt.Println("Working dir:", workingDir)
 
-	dirs, err := ioutil.ReadDir(fmt.Sprintf("%s/routes", workingDir))
+	dirs, err := ioutil.ReadDir(fmt.Sprintf("%s/services", workingDir))
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	for _, dir := range dirs {
 		if dir.IsDir() {
-			fmt.Println(workingDir, "/routes/", dir.Name())
+			fmt.Println(workingDir, "/services/", dir.Name())
 			config := generator.Config{}
-			err := core.LoadConfig(fmt.Sprintf("%s/routes/%s/settings.yml", workingDir, dir.Name()), &config)
+			err := core.LoadConfig(fmt.Sprintf("%s/services/%s/settings.yml", workingDir, dir.Name()), &config)
 			if err != nil {
 				log.Fatal(err)
 			}
