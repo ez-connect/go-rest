@@ -7,7 +7,6 @@ import (
 
 func GenerateModel(packageName string, config ModelConfig) string {
 	buf := []string{}
-	buf = append(buf, "\n")
 	buf = append(buf, fmt.Sprintf("package %s\n", packageName))
 
 	buf = append(buf, "import (")

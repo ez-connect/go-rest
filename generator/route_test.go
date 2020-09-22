@@ -27,7 +27,7 @@ func (r *Router) Init(e *echo.Echo, db db.DatabaseBase) {
 `
 
 func TestGenerateRoutes(t *testing.T) {
-	v := GenerateRoute(
+	v := GenerateRoutes(
 		"test",
 		"testModel",
 		[]RouteGroup{

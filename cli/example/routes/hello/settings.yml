@@ -1,5 +1,12 @@
-name: hello
-attributes:
-    - name: _id
-      type: string
-      required: false
+model:
+    name: test
+    attributes:
+        - name: id
+          type: string
+          required: false
+routes:
+    - path: /hello
+      children:
+        - method: GET
+          path: ""
+          handler: Find
