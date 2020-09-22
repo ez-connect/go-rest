@@ -1,12 +1,15 @@
 model:
-    name: test
-    attributes:
-        - name: id
-          type: string
-          required: false
+  name: test
+  attributes:
+    - name: id
+      type: string
+      required: false
 routes:
-    - path: /hello
-      children:
-        - method: GET
-          path: ""
-          handler: Find
+  - path: /hello
+    children:
+      - method: GET
+        path: ""
+        handler: Find
+      - method: POST
+        path: ""
+        handler: Insert
