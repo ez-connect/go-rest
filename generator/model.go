@@ -15,6 +15,8 @@ func GenerateModel(packageName string, config ModelConfig) string {
 	buf = append(buf, "\t\"go.mongodb.org/mongo-driver/bson/primitive\"")
 	buf = append(buf, ")\n")
 
+	buf = append(buf, fmt.Sprintf("const Collection%s = \"%s\"\n", strings.Title(config.Name), config.Name))
+
 	buf = append(buf, "type Model struct {")
 	for _, v := range config.Attributes {
 		buf = append(buf, fmt.Sprintf(
