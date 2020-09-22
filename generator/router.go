@@ -7,14 +7,7 @@ import (
 
 func GenerateRoutes(packageName, collection string, routes []RouteGroup) string {
 	buf := []string{}
-	buf = append(buf, "\n")
 	buf = append(buf, fmt.Sprintf("package %s\n", packageName))
-
-	buf = append(buf, "import (")
-	buf = append(buf, "\t\"github.com/ez-connect/go-rest/db\"")
-	buf = append(buf, "\t\"github.com/ez-connect/go-rest/rest\"")
-	buf = append(buf, "\t\"github.com/labstack/echo/v4\"")
-	buf = append(buf, ")\n")
 
 	buf = append(buf, "type Router struct {")
 	buf = append(buf, "\trest.RouterBase")

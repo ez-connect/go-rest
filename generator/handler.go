@@ -63,11 +63,6 @@ func GenerateHandler(packageName string) string {
 	buf := []string{}
 	buf = append(buf, fmt.Sprintf("package %s\n", packageName))
 
-	buf = append(buf, "import (")
-	buf = append(buf, "\t\"github.com/ez-connect/go-rest/rest\"")
-	buf = append(buf, "\t\"github.com/labstack/echo/v4\"")
-	buf = append(buf, ")\n")
-
 	buf = append(buf, "type Handler struct {")
 	buf = append(buf, "\trest.HandlerBase")
 	buf = append(buf, "\tRepo Repository")
