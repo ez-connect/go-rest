@@ -61,7 +61,6 @@ func (h *Handler) Delete(c echo.Context) error {
 
 func GenerateHandler(packageName string) string {
 	buf := []string{}
-	buf = append(buf, "\n")
 	buf = append(buf, fmt.Sprintf("package %s\n", packageName))
 
 	buf = append(buf, "import (")

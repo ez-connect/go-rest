@@ -1,5 +1,0 @@
-name: test
-attributes:
-    - name: _id
-      type: string
-      required: false
