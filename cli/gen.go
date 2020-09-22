@@ -38,6 +38,7 @@ func main() {
 			generator.GenerateFile(workingDir, dir.Name(), "repository", config)
 			generator.GenerateFile(workingDir, dir.Name(), "handler", config)
 			generator.GenerateFile(workingDir, dir.Name(), "router", config)
+
 		}
 	}
 }
