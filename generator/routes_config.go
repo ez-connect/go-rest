@@ -1,5 +1,10 @@
 package generator
 
+type RouteGroup struct {
+	Path     string
+	Children []RouteConfig
+}
+
 type RouteConfig struct {
 	Method  string
 	Path    string
