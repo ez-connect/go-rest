@@ -87,7 +87,7 @@ func GenerateHandlerExt(packageName string) string {
 	buf = append(buf, ")\n")
 
 	buf = append(buf, "type Handler struct {")
-	buf = append(buf, fmt.Sprintf("\t%s.HandlerBase", packageName))
+	buf = append(buf, fmt.Sprintf("\t%s.Handler", packageName))
 	buf = append(buf, fmt.Sprintf("\tRepo %s.Repository", packageName))
 	buf = append(buf, "}\n")
 
