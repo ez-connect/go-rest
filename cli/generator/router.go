@@ -29,7 +29,7 @@ func GenerateRoutes(packageName, collection string, routes []RouteGroup) string 
 		buf = append(buf, fmt.Sprintf("\tg%v := e.Group(\"%s\")", i, v.Path))
 		for _, r := range v.Children {
 			buf = append(buf,
-				fmt.Sprintf("\tg%v.%s(\"%s\", h.%s%s)", i, r.Method, r.Path, r.Handler, strings.Title(packageName)),
+				fmt.Sprintf("\tg%v.%s(\"%s\", h.%s)", i, r.Method, r.Path, r.Handler),
 			)
 		}
 	}

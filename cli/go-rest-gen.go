@@ -29,8 +29,17 @@ func main() {
 			log.Fatal(err)
 		}
 
+		// Generate
+		generator.GenerateFileExt(workingDir, service, "settings.yml")
+		generator.GenerateFileExt(workingDir, service, "model.go")
+		generator.GenerateFileExt(workingDir, service, "repository.go")
+		generator.GenerateFileExt(workingDir, service, "handler.go")
+		generator.GenerateFileExt(workingDir, service, "router.go")
+
+		return
 	}
 
+	// Generate source from services
 	dirs, err := ioutil.ReadDir(fmt.Sprintf("%s/services", workingDir))
 	if err != nil {
 		log.Fatal(err)
@@ -51,10 +60,10 @@ func main() {
 			}
 
 			// Generate
-			generator.GenerateFile(workingDir, dir.Name(), "model", config)
-			generator.GenerateFile(workingDir, dir.Name(), "repository", config)
-			generator.GenerateFile(workingDir, dir.Name(), "handler", config)
-			generator.GenerateFile(workingDir, dir.Name(), "router", config)
+			generator.GenerateFile(workingDir, dir.Name(), "model.go", config)
+			generator.GenerateFile(workingDir, dir.Name(), "repository.go", config)
+			generator.GenerateFile(workingDir, dir.Name(), "handler.go", config)
+			generator.GenerateFile(workingDir, dir.Name(), "router.go", config)
 		}
 	}
 
