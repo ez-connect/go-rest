@@ -12,7 +12,7 @@ model:
     - name: name
       type: string
 routes:
-  - path: /%s
+  - path: /%ss
     children:
       - method: GET
         path: ""
