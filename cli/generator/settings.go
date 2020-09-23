@@ -2,38 +2,55 @@ package generator
 
 import (
 	"fmt"
+	"net/http"
 	"strings"
+
+	"gopkg.in/yaml.v2"
 )
 
-const settings = `
-model:
-  name: %s
-  attributes:
-    - name: name
-      type: string
-routes:
-  - path: /%ss
-    children:
-      - method: GET
-        path: ""
-        handler: Find%s
-      - method: POST
-        path: ""
-        handler: Insert%s
-      - method: GET
-        path: "/:id"
-        handler: FindOne%s
-      - method: PUT
-        path: "/:id"
-        handler: Update%s
-      - method: DELETE
-        path: "/:id"
-        handler: Delete%s
-`
-
 func GenerateSettings(packageName string) string {
-	upper := strings.Title(packageName)
-	return fmt.Sprintf(settings, packageName, packageName,
-		upper, upper, upper, upper, upper,
-	)
+	doc := Config{
+		Model: ModelConfig{
+			Name: packageName,
+			Attributes: []Attribute{
+				{Name: "name", Type: "string"},
+				{Name: "price", Type: "float32"},
+			},
+		},
+		Indexes: []Index{},
+		Routes: []RouteGroup{
+			{
+				Path: fmt.Sprintf("/%ss", packageName),
+				Children: []RouteConfig{
+					{
+						Method:  http.MethodGet,
+						Handler: fmt.Sprintf("Find%s", strings.Title(packageName)),
+					},
+					{
+						Method:  http.MethodPost,
+						Handler: fmt.Sprintf("Insert%s", strings.Title(packageName)),
+					},
+					{
+						Method:  http.MethodGet,
+						Handler: fmt.Sprintf("FindOne%s", strings.Title(packageName)),
+					},
+					{
+						Method:  http.MethodPut,
+						Handler: fmt.Sprintf("Update%s", strings.Title(packageName)),
+					},
+					{
+						Method:  http.MethodDelete,
+						Handler: fmt.Sprintf("Delete%s", strings.Title(packageName)),
+					},
+				},
+			},
+		},
+	}
+
+	data, err := yaml.Marshal(doc)
+	if err != nil {
+		return ""
+	}
+
+	return string(data)
 }
