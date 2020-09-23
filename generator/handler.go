@@ -58,9 +58,8 @@ func GenerateHandler(packageName string) string {
 	buf = append(buf, "import (")
 	buf = append(buf, "\t\"net/http\"\n")
 
-	buf = append(buf, "\t\"github.com/ez-connect/go-rest/db\"")
-	buf = append(buf, "\t\"github.com/ez-connect/go-rest/filter\"")
 	buf = append(buf, "\t\"github.com/ez-connect/go-rest/rest\"")
+	buf = append(buf, "\t\"github.com/ez-connect/go-rest/rest/filter\"")
 	buf = append(buf, "\t\"github.com/labstack/echo/v4\"")
 	buf = append(buf, ")\n")
 

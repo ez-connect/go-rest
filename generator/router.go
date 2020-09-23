@@ -9,6 +9,12 @@ func GenerateRoutes(packageName, collection string, routes []RouteGroup) string 
 	buf := []string{}
 	buf = append(buf, fmt.Sprintf("package %s\n", packageName))
 
+	buf = append(buf, "import (")
+	buf = append(buf, "\t\"github.com/ez-connect/go-rest/db\"")
+	buf = append(buf, "\t\"github.com/ez-connect/go-rest/rest\"")
+	buf = append(buf, "\t\"github.com/labstack/echo/v4\"")
+	buf = append(buf, ")\n")
+
 	buf = append(buf, "type Router struct {")
 	buf = append(buf, "\trest.RouterBase")
 	buf = append(buf, "}\n")
@@ -22,7 +28,9 @@ func GenerateRoutes(packageName, collection string, routes []RouteGroup) string 
 	for i, v := range routes {
 		buf = append(buf, fmt.Sprintf("\tg%v := e.Group(\"%s\")", i, v.Path))
 		for _, r := range v.Children {
-			buf = append(buf, fmt.Sprintf("\tg%v.%s(\"%s\", h.%s)", i, r.Method, r.Path, r.Handler))
+			buf = append(buf,
+				fmt.Sprintf("\tg%v.%s(\"%s\", h.%s%s)", i, r.Method, r.Path, r.Handler, strings.Title(packageName)),
+			)
 		}
 	}
 
