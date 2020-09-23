@@ -6,10 +6,10 @@ import (
 )
 
 var find = `func (h *Handler) Find%s(c echo.Context) error {
-	filter := filter.Find(c)
-	option := filter.Option(c)
+	f := filter.Find(c)
+	o := filter.Option(c)
 	docs := []Model{}
-	return h.Find(c, filter, option, nil, &docs)
+	return h.Find(c, f, o, nil, &docs)
 }
 `
 
@@ -20,34 +20,34 @@ var insert = `func (h *Handler) Insert%s(c echo.Context) error {
 `
 
 var findOne = `func (h *Handler) FindOne%s(c echo.Context) error {
-	filter, err := filter.FindOne(c)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	f := filter.FindOne(c)
+	if f == nil {
+		return echo.NewHTTPError(http.StatusBadRequest)
 	}
 
 	doc := Model{}
-	return h.FindOne(c, filter, nil, &doc)
+	return h.FindOne(c, f, nil, &doc)
 }
 `
 
 var update = `func (h *Handler) Update%s(c echo.Context) error {
-	filter, err := filter.FindOne(c)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	f := filter.FindOne(c)
+	if f == nil {
+		return echo.NewHTTPError(http.StatusBadRequest)
 	}
 
 	doc := Model{}
-	return h.UpdateOne(c, filter, &doc)
+	return h.UpdateOne(c, f, &doc)
 }
 `
 
 var delete = `func (h *Handler) Delete%s(c echo.Context) error {
-	filter, err := filter.FindOne(c)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	f := filter.FindOne(c)
+	if f == nil {
+		return echo.NewHTTPError(http.StatusBadRequest)
 	}
 
-	return h.DeleteOne(c, filter)
+	return h.DeleteOne(c, f)
 }
 `
 
