@@ -25,3 +25,18 @@ func GenerateRepository(packageName, collection string) string {
 
 	return strings.Join(buf, "\n")
 }
+
+func GenerateRepositoryExt(packageName string) string {
+	buf := []string{}
+	buf = append(buf, fmt.Sprintf("package %s\n", packageName))
+
+	buf = append(buf, "import (")
+	buf = append(buf, fmt.Sprintf("\t\"app/generated/%s\"", packageName))
+	buf = append(buf, ")\n")
+
+	buf = append(buf, "type Repository struct {")
+	buf = append(buf, fmt.Sprintf("\t%s.Repository", packageName))
+	buf = append(buf, "}\n")
+
+	return strings.Join(buf, "\n")
+}

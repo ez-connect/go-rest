@@ -38,3 +38,18 @@ func GenerateRoutes(packageName, collection string, routes []RouteGroup) string 
 
 	return strings.Join(buf, "\n")
 }
+
+func GenerateRoutesExt(packageName string) string {
+	buf := []string{}
+	buf = append(buf, fmt.Sprintf("package %s\n", packageName))
+
+	buf = append(buf, "import (")
+	buf = append(buf, fmt.Sprintf("\t\"app/generated/%s\"", packageName))
+	buf = append(buf, ")\n")
+
+	buf = append(buf, "type Router struct {")
+	buf = append(buf, fmt.Sprintf("\t%s.Router", packageName))
+	buf = append(buf, "}\n")
+
+	return strings.Join(buf, "\n")
+}

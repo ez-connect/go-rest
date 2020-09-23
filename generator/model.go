@@ -42,3 +42,18 @@ func GenerateModel(packageName string, config ModelConfig) string {
 
 	return strings.Join(buf, "\n")
 }
+
+func GenerateModelExt(packageName string) string {
+	buf := []string{}
+	buf = append(buf, fmt.Sprintf("package %s\n", packageName))
+
+	buf = append(buf, "import (")
+	buf = append(buf, fmt.Sprintf("\t\"app/generated/%s\"", packageName))
+	buf = append(buf, ")\n")
+
+	buf = append(buf, "type Model struct {")
+	buf = append(buf, fmt.Sprintf("\t%s.Model", packageName))
+	buf = append(buf, "}\n")
+
+	return strings.Join(buf, "\n")
+}
