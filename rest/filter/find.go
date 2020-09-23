@@ -7,8 +7,12 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func Find(c echo.Context) bson.M {
-	return nil
+func Find(c echo.Context, v interface{}) bson.M {
+	query := c.QueryParam("q")
+	if query == "" {
+		return nil
+	}
+	return Unmarshal(query, v)
 }
 
 func FindOne(c echo.Context) bson.M {

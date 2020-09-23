@@ -6,7 +6,7 @@ import (
 )
 
 var find = `func (h *Handler) Find%s(c echo.Context) error {
-	f := filter.Find(c)
+	f := filter.Find(c, &Model{})
 	o := filter.Option(c)
 	docs := []Model{}
 	return h.Find(c, f, o, nil, &docs)
