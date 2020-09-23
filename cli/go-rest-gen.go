@@ -9,17 +9,27 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/ez-connect/go-rest/cli/generator"
 	"github.com/ez-connect/go-rest/core"
-	"github.com/ez-connect/go-rest/generator"
 )
 
 func main() {
 	dir := flag.String("dir", ".", "Working dir")
+	new := flag.String("new", "", "Create new service")
 	flag.Parse()
 
 	workingDir := *dir
-
 	fmt.Println("Working dir:", workingDir)
+
+	// New service generator
+	service := *new
+	if service != "" {
+		err := os.MkdirAll(fmt.Sprintf("%s/services/%s", workingDir, service), os.ModeDir)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+	}
 
 	dirs, err := ioutil.ReadDir(fmt.Sprintf("%s/services", workingDir))
 	if err != nil {
@@ -45,11 +55,10 @@ func main() {
 			generator.GenerateFile(workingDir, dir.Name(), "repository", config)
 			generator.GenerateFile(workingDir, dir.Name(), "handler", config)
 			generator.GenerateFile(workingDir, dir.Name(), "router", config)
-
 		}
 	}
 
-	// format code
+	// Format code
 	cmd := exec.Command("golangci-lint", "run", "--fix", "--disable-all", "--enable", "goimports", workingDir+"/...")
 	var er bytes.Buffer
 	cmd.Stderr = &er
