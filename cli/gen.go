@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -13,7 +14,11 @@ import (
 )
 
 func main() {
-	workingDir := "."
+	dir := flag.String("dir", ".", "Working dir")
+	flag.Parse()
+
+	workingDir := *dir
+
 	fmt.Println("Working dir:", workingDir)
 
 	dirs, err := ioutil.ReadDir(fmt.Sprintf("%s/services", workingDir))
