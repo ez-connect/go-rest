@@ -14,6 +14,13 @@ type ModelConfig struct {
 	Attributes []Attribute `yaml:"attributes"`
 }
 
+type Index struct {
+	Fields []string
+	Order  int // 1: asc or -1: desc
+	Unique bool
+	Text   bool
+}
+
 type RouteGroup struct {
 	Path     string
 	Children []RouteConfig
@@ -28,6 +35,7 @@ type RouteConfig struct {
 }
 
 type Config struct {
-	Model  ModelConfig
-	Routes []RouteGroup
+	Model   ModelConfig
+	Indexes []Index
+	Routes  []RouteGroup
 }

@@ -11,6 +11,7 @@ func GenerateRepository(packageName, collection string) string {
 
 	buf = append(buf, "import (")
 	buf = append(buf, "\t\"github.com/ez-connect/go-rest/rest\"")
+	buf = append(buf, "\t\"go.mongodb.org/mongo-driver/bson\"")
 	buf = append(buf, ")\n")
 
 	buf = append(buf, "type Repository struct {")
@@ -21,6 +22,8 @@ func GenerateRepository(packageName, collection string) string {
 	buf = append(buf, "///////////////////////////////////////////////////////////////////\n")
 
 	buf = append(buf, "func (r *Repository) EnsureIndexs() {")
+	buf = append(buf, "\tr.Driver.EnsureIndex(CollectionName, \"createdAt\", bson.M{\"createdAt\": -1}, false)")
+	buf = append(buf, "\tr.Driver.EnsureIndex(CollectionName, \"updatedAt\", bson.M{\"updatedAt\": -1}, false)")
 	buf = append(buf, "}\n")
 
 	return strings.Join(buf, "\n")

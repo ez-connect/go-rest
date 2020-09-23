@@ -21,7 +21,7 @@ func GenerateRoutes(packageName, collection string, routes []RouteGroup) string 
 
 	buf = append(buf, "func (r *Router) Init(e *echo.Echo, db db.DatabaseBase) {")
 	buf = append(buf, "\th := Handler{}")
-	buf = append(buf, fmt.Sprintf("\th.Init(db, Collection%s)", strings.Title(collection)))
+	buf = append(buf, "\th.Init(db, CollectionName)")
 	buf = append(buf, "\th.Repo.Init(db)")
 	buf = append(buf, "\th.Repo.EnsureIndexs()\n")
 

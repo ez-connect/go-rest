@@ -14,7 +14,9 @@ var find = `func (h *Handler) Find%s(c echo.Context) error {
 `
 
 var insert = `func (h *Handler) Insert%s(c echo.Context) error {
-	doc := Model{}
+	doc := Model{
+		CreatedAt: core.Now(),
+	}
 	return h.Insert(c, &doc)
 }
 `
@@ -36,7 +38,9 @@ var update = `func (h *Handler) Update%s(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest)
 	}
 
-	doc := Model{}
+	doc := Model{
+		UpdatedAt: core.Now(),
+	}
 	return h.UpdateOne(c, f, &doc)
 }
 `
@@ -58,6 +62,7 @@ func GenerateHandler(packageName string) string {
 	buf = append(buf, "import (")
 	buf = append(buf, "\t\"net/http\"\n")
 
+	buf = append(buf, "\t\"github.com/ez-connect/go-rest/core\"")
 	buf = append(buf, "\t\"github.com/ez-connect/go-rest/rest\"")
 	buf = append(buf, "\t\"github.com/ez-connect/go-rest/rest/filter\"")
 	buf = append(buf, "\t\"github.com/labstack/echo/v4\"")
