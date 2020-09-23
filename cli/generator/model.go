@@ -24,7 +24,7 @@ func GenerateModel(packageName string, config ModelConfig) string {
 	)
 	for _, v := range config.Attributes {
 		buf = append(buf, fmt.Sprintf(
-			"\t%s %s `bson:\"%s\" json:\"%s\"`",
+			"\t%s %s `bson:\"%s,omitempty\" json:\"%s,omitempty\"`",
 			strings.Title(v.Name), v.Type, v.Name, v.Name),
 		)
 	}
