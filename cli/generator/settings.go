@@ -17,7 +17,8 @@ func GenerateSettings(packageName string) string {
 				{Name: "price", Type: "float32"},
 			},
 		},
-		Indexes: []Index{},
+		EmbedModels: []ModelConfig{},
+		Indexes:     []Index{},
 		Routes: []RouteGroup{
 			{
 				Path: fmt.Sprintf("/%ss", packageName),

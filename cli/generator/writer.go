@@ -10,7 +10,7 @@ func GenerateFile(workingDir, packageName, fileType string, config Config) {
 	var v string
 	switch fileType {
 	case "model.go":
-		v = GenerateModel(packageName, config.Model)
+		v = GenerateModel(packageName, config.Model, config.EmbedModels)
 	case "repository.go":
 		v = GenerateRepository(packageName, config.Model.Name)
 	case "handler.go":
