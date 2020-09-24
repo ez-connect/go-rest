@@ -7,7 +7,7 @@ type Attribute struct {
 }
 
 type ModelConfig struct {
-	// Collection name
+	// Collection name for main model or name for embed model
 	Name string `yaml:"name"`
 
 	// All attributes
@@ -38,4 +38,6 @@ type Config struct {
 	Model   ModelConfig
 	Indexes []Index
 	Routes  []RouteGroup
+	// embed structures only
+	EmbedModels []ModelConfig
 }

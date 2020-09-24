@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func GenerateModel(packageName string, config ModelConfig) string {
+func GenerateModel(packageName string, config ModelConfig, embedConfig []ModelConfig) string {
 	buf := []string{}
 	buf = append(buf, fmt.Sprintf("package %s\n", packageName))
 
@@ -40,6 +40,26 @@ func GenerateModel(packageName string, config ModelConfig) string {
 
 	buf = append(buf, "}\n")
 
+	buf = append(buf, GenerateEmbedModels(embedConfig))
+
+	return strings.Join(buf, "\n")
+}
+
+func GenerateEmbedModels(embedConfig []ModelConfig) string {
+	buf := []string{}
+
+	for _, config := range embedConfig {
+		buf = append(buf, fmt.Sprintf("type %s struct {", config.Name))
+
+		for _, v := range config.Attributes {
+			buf = append(buf, fmt.Sprintf(
+				"\t%s %s `bson:\"%s,omitempty\" json:\"%s,omitempty\"`",
+				strings.Title(v.Name), v.Type, v.Name, v.Name),
+			)
+		}
+
+		buf = append(buf, "}\n")
+	}
 	return strings.Join(buf, "\n")
 }
 

@@ -26,6 +26,7 @@ func TestGenerateModel(t *testing.T) {
 				},
 			},
 		},
+		[]ModelConfig{},
 	)
 
 	assert.NotEmpty(t, v)
