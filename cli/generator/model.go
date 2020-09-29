@@ -14,7 +14,7 @@ func GenerateModel(packageName string, config ModelConfig, embedConfig []ModelCo
 	buf = append(buf, "\t\"go.mongodb.org/mongo-driver/bson/primitive\"")
 	buf = append(buf, ")\n")
 
-	buf = append(buf, fmt.Sprintf("const CollectionName = \"%ss\"\n", config.Name))
+	buf = append(buf, fmt.Sprintf("const CollectionName = \"%s\"\n", config.Name))
 
 	buf = append(buf, "type Model struct {")
 
