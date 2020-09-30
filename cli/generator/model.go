@@ -23,9 +23,19 @@ func GenerateModel(packageName string, config ModelConfig, embedConfig []ModelCo
 		"\tId *primitive.ObjectID `bson:\"_id,omitempty\" json:\"id,omitempty\"`",
 	)
 	for _, v := range config.Attributes {
+		var omitempty = ""
+		if v.Omitempty {
+			omitempty = ",omitempty"
+		}
+
+		var validate = ""
+		if v.Required {
+			validate = " validate:\"required\""
+		}
+
 		buf = append(buf, fmt.Sprintf(
-			"\t%s %s `bson:\"%s,omitempty\" json:\"%s,omitempty\"`",
-			strings.Title(v.Name), v.Type, v.Name, v.Name),
+			"\t%s %s `bson:\"%s%s\" json:\"%s%s\"%s`",
+			strings.Title(v.Name), v.Type, v.Name, omitempty, v.Name, omitempty, validate),
 		)
 	}
 

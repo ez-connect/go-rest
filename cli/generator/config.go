@@ -1,9 +1,10 @@
 package generator
 
 type Attribute struct {
-	Name     string `yaml:"name"`
-	Type     string `yaml:"type"`
-	Required bool   `yaml:"required"`
+	Name      string `yaml:"name"`
+	Type      string `yaml:"type"`
+	Required  bool   `yaml:"required"`
+	Omitempty bool   `yaml:"omitempty"`
 }
 
 type ModelConfig struct {
