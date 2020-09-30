@@ -9,14 +9,15 @@ import (
 func TestGenerateRoutes(t *testing.T) {
 	v := GenerateRoutes(
 		"test",
-		"testModel",
-		[]RouteGroup{
-			{
-				Path: "hello",
-				Children: []RouteConfig{
-					{
-						Method:  "GET",
-						Handler: "Find",
+		Config{
+			Routes: []RouteGroup{
+				{
+					Path: "hello",
+					Children: []RouteConfig{
+						{
+							Method:  "GET",
+							Handler: "Find",
+						},
 					},
 				},
 			},

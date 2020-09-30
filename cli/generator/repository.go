@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func GenerateRepository(packageName, collection string) string {
+func GenerateRepository(packageName string, config Config) string {
 	buf := []string{}
 	buf = append(buf, fmt.Sprintf("package %s\n", packageName))
 
@@ -24,6 +24,20 @@ func GenerateRepository(packageName, collection string) string {
 	buf = append(buf, "func (r *Repository) EnsureIndexs() {")
 	buf = append(buf, "\tr.Driver.EnsureIndex(CollectionName, \"createdAt\", bson.M{\"createdAt\": -1}, false)")
 	buf = append(buf, "\tr.Driver.EnsureIndex(CollectionName, \"updatedAt\", bson.M{\"updatedAt\": -1}, false)")
+
+	for _, v := range config.Indexes {
+		name := strings.Join(v.Fields, ".")
+		fields := []string{}
+		for _, f := range v.Fields {
+			if v.Text {
+				fields = append(fields, fmt.Sprintf("\"%s\" : \"text\"", f))
+			} else {
+				fields = append(fields, fmt.Sprintf("\"%s\" : %v", f, v.Order))
+			}
+		}
+		buf = append(buf, fmt.Sprintf("\tr.Driver.EnsureIndex(CollectionName, \"%s\", bson.M{%s}, %v)", name, strings.Join(fields, ","), v.Unique))
+	}
+
 	buf = append(buf, "}\n")
 
 	return strings.Join(buf, "\n")

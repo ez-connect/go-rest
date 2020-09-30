@@ -10,13 +10,13 @@ func GenerateFile(workingDir, packageName, fileType string, config Config) {
 	var v string
 	switch fileType {
 	case "model.go":
-		v = GenerateModel(packageName, config.Model, config.EmbedModels)
+		v = GenerateModel(packageName, config)
 	case "repository.go":
-		v = GenerateRepository(packageName, config.Model.Name)
+		v = GenerateRepository(packageName, config)
 	case "handler.go":
 		v = GenerateHandler(packageName)
 	case "router.go":
-		v = GenerateRoutes(packageName, config.Model.Name, config.Routes)
+		v = GenerateRoutes(packageName, config)
 	default:
 		log.Fatal("Not support type:", fileType)
 	}

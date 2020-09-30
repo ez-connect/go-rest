@@ -18,7 +18,17 @@ func GenerateSettings(packageName string) string {
 			},
 		},
 		EmbedModels: []ModelConfig{},
-		Indexes:     []Index{},
+		Indexes: []Index{
+			{
+				Fields: []string{"name"},
+				Text:   true,
+				Unique: true,
+			},
+			{
+				Fields: []string{"price"},
+				Order:  -1,
+			},
+		},
 		Routes: []RouteGroup{
 			{
 				Path: fmt.Sprintf("/%ss", packageName),

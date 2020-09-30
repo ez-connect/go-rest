@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func GenerateModel(packageName string, config ModelConfig, embedConfig []ModelConfig) string {
+func GenerateModel(packageName string, config Config) string {
 	buf := []string{}
 	buf = append(buf, fmt.Sprintf("package %s\n", packageName))
 
@@ -14,7 +14,7 @@ func GenerateModel(packageName string, config ModelConfig, embedConfig []ModelCo
 	buf = append(buf, "\t\"go.mongodb.org/mongo-driver/bson/primitive\"")
 	buf = append(buf, ")\n")
 
-	buf = append(buf, fmt.Sprintf("const CollectionName = \"%s\"\n", config.Name))
+	buf = append(buf, fmt.Sprintf("const CollectionName = \"%s\"\n", config.Model.Name))
 
 	buf = append(buf, "type Model struct {")
 
@@ -22,7 +22,7 @@ func GenerateModel(packageName string, config ModelConfig, embedConfig []ModelCo
 	buf = append(buf,
 		"\tId *primitive.ObjectID `bson:\"_id,omitempty\" json:\"id,omitempty\"`",
 	)
-	for _, v := range config.Attributes {
+	for _, v := range config.Model.Attributes {
 		var omitempty = ""
 		if v.Omitempty {
 			omitempty = ",omitempty"
@@ -50,26 +50,8 @@ func GenerateModel(packageName string, config ModelConfig, embedConfig []ModelCo
 
 	buf = append(buf, "}\n")
 
-	buf = append(buf, GenerateEmbedModels(embedConfig))
+	buf = append(buf, generateEmbedModels(config.EmbedModels))
 
-	return strings.Join(buf, "\n")
-}
-
-func GenerateEmbedModels(embedConfig []ModelConfig) string {
-	buf := []string{}
-
-	for _, config := range embedConfig {
-		buf = append(buf, fmt.Sprintf("type %s struct {", config.Name))
-
-		for _, v := range config.Attributes {
-			buf = append(buf, fmt.Sprintf(
-				"\t%s %s `bson:\"%s,omitempty\" json:\"%s,omitempty\"`",
-				strings.Title(v.Name), v.Type, v.Name, v.Name),
-			)
-		}
-
-		buf = append(buf, "}\n")
-	}
 	return strings.Join(buf, "\n")
 }
 
@@ -85,5 +67,23 @@ func GenerateModelExt(packageName string) string {
 	buf = append(buf, fmt.Sprintf("\t%s.Model", packageName))
 	buf = append(buf, "}\n")
 
+	return strings.Join(buf, "\n")
+}
+
+func generateEmbedModels(embedConfig []ModelConfig) string {
+	buf := []string{}
+
+	for _, config := range embedConfig {
+		buf = append(buf, fmt.Sprintf("type %s struct {", config.Name))
+
+		for _, v := range config.Attributes {
+			buf = append(buf, fmt.Sprintf(
+				"\t%s %s `bson:\"%s,omitempty\" json:\"%s,omitempty\"`",
+				strings.Title(v.Name), v.Type, v.Name, v.Name),
+			)
+		}
+
+		buf = append(buf, "}\n")
+	}
 	return strings.Join(buf, "\n")
 }
