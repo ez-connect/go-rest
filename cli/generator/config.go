@@ -1,25 +1,25 @@
 package generator
 
 type Attribute struct {
-	Name      string `yaml:"name"`
-	Type      string `yaml:"type"`
-	Required  bool   `yaml:"required"`
-	Omitempty bool   `yaml:"omitempty"`
+	Name      string
+	Type      string
+	Required  bool
+	Omitempty bool
 }
 
 type ModelConfig struct {
 	// Collection name for main model or name for embed model
-	Name string `yaml:"name"`
+	Name string
 
 	// All attributes
-	Attributes []Attribute `yaml:"attributes"`
+	Attributes []Attribute
 }
 
 type Index struct {
 	Fields []string
-	Order  int // 1: asc or -1: desc
+	Order  int  // 1: asc, -1: desc
+	Text   bool // text index
 	Unique bool
-	Text   bool
 }
 
 type RouteGroup struct {

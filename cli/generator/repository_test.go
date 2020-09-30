@@ -8,7 +8,9 @@ import (
 
 func TestGenerateRepository(t *testing.T) {
 	v := GenerateRepository(
-		"test", "testCollection",
+		"test", Config{
+			Indexes: []Index{},
+		},
 	)
 
 	assert.NotEmpty(t, v)

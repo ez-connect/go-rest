@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func GenerateRoutes(packageName, collection string, routes []RouteGroup) string {
+func GenerateRoutes(packageName string, config Config) string {
 	buf := []string{}
 	buf = append(buf, fmt.Sprintf("package %s\n", packageName))
 
@@ -25,7 +25,7 @@ func GenerateRoutes(packageName, collection string, routes []RouteGroup) string 
 	buf = append(buf, "\th.Repo.Init(db)")
 	buf = append(buf, "\th.Repo.EnsureIndexs()\n")
 
-	for i, v := range routes {
+	for i, v := range config.Routes {
 		buf = append(buf, fmt.Sprintf("\tg%v := e.Group(\"%s\")", i, v.Path))
 		for _, r := range v.Children {
 			buf = append(buf,
