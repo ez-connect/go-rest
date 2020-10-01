@@ -18,6 +18,7 @@ var (
 		"$eq",
 		"$gt",
 		"$lt",
+		"$in",
 	}
 
 	objectIdType = reflect.TypeOf(primitive.NewObjectID())
@@ -127,6 +128,5 @@ func Unmarshal(query string, v interface{}) map[string]interface{} {
 	}
 
 	// validate query
-	s := rv.Elem()
-	return validateMap(res, s)
+	return validateMap(res, rv.Elem())
 }
