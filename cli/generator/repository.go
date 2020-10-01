@@ -32,7 +32,7 @@ func GenerateRepository(packageName string, config Config) string {
 			if v.Text {
 				fields = append(fields, fmt.Sprintf("\"%s\" : \"text\"", f))
 			} else {
-				fields = append(fields, fmt.Sprintf("\"%s\" : %v", f, v.Order))
+				fields = append(fields, fmt.Sprintf("\"%s\" : 1", f))
 			}
 		}
 		buf = append(buf, fmt.Sprintf("\tr.Driver.EnsureIndex(CollectionName, \"%s\", bson.M{%s}, %v)", name, strings.Join(fields, ","), v.Unique))
