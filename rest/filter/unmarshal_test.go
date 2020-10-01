@@ -24,6 +24,6 @@ func TestUnmarshal(t *testing.T) {
 				]
 			}
 		]
-	}`, xxx{})
+	}`, &xxx{})
 	assert.NotNil(t, query)
 }

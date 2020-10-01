@@ -50,7 +50,7 @@ func validateMap(v map[string]interface{}, rv reflect.Value) bson.M {
 			st, found := rv.Type().FieldByName(key)
 			if found {
 				bsonInfo := strings.Split(st.Tag.Get("bson"), ",")
-				if len(bsonInfo) > 0 {
+				if len(bsonInfo) > 0 && bsonInfo[0] != "" {
 					key = bsonInfo[0]
 				}
 			}
