@@ -26,7 +26,6 @@ func GenerateSettings(packageName string) string {
 			},
 			{
 				Fields: []string{"price"},
-				Order:  -1,
 			},
 		},
 		Routes: []RouteGroup{
