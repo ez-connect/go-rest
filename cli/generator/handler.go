@@ -16,6 +16,7 @@ var find = `func (h *Handler) Find%s(c echo.Context) error {
 var insert = `func (h *Handler) Insert%s(c echo.Context) error {
 	doc := Model{
 		CreatedAt: core.Now(),
+		UpdatedAt: core.Now(),
 	}
 	return h.Insert(c, &doc)
 }
