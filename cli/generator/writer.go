@@ -6,6 +6,32 @@ import (
 	"os"
 )
 
+func GenerateBase(workingDir, fileType string) {
+	var v string
+	switch fileType {
+	case "handler":
+		v = GenerateBaseHandler()
+	case "repository":
+		v = GenerateBaseRepository()
+	default:
+		log.Fatal("Not support type:", fileType)
+	}
+
+	filename := fmt.Sprintf("%s/services/_base/%s.go", workingDir, fileType)
+	fmt.Println(filename)
+	f, err := os.Create(filename)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer f.Close()
+
+	_, err = f.WriteString(v)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 func GenerateFile(workingDir, packageName, fileType string, config Config) {
 	var v string
 	switch fileType {

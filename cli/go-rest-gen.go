@@ -15,14 +15,29 @@ import (
 
 func main() {
 	dir := flag.String("dir", ".", "Working dir")
+	init := flag.String("init", "n", "Init generator")
 	new := flag.String("new", "", "Create new service")
 	flag.Parse()
 
 	workingDir := *dir
 	fmt.Println("Working dir:", workingDir)
 
+	// Init generator
+	if *init == "y" {
+		err := os.MkdirAll(fmt.Sprintf("%s/services/_base", workingDir), os.ModeDir)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		generator.GenerateBase(workingDir, "handler")
+		generator.GenerateBase(workingDir, "repository")
+
+		return
+	}
+
 	// New service generator
 	service := *new
+	fmt.Println(service)
 	if service != "" {
 		err := os.MkdirAll(fmt.Sprintf("%s/services/%s", workingDir, service), os.ModeDir)
 		if err != nil {
@@ -46,7 +61,7 @@ func main() {
 	}
 
 	for _, dir := range dirs {
-		if dir.IsDir() {
+		if dir.IsDir() && dir.Name() != "_base" {
 			fmt.Println(workingDir, "/services/", dir.Name())
 			config := generator.Config{}
 			err := core.LoadConfig(fmt.Sprintf("%s/services/%s/settings.yml", workingDir, dir.Name()), &config)
