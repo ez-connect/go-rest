@@ -70,6 +70,7 @@ func GenerateHandler(packageName string) string {
 
 	buf = append(buf, "type Handler struct {")
 	buf = append(buf, fmt.Sprintf("\t%s.Handler", packageName))
+	buf = append(buf, "\tRepo Repository")
 	buf = append(buf, "}\n")
 
 	buf = append(buf, "///////////////////////////////////////////////////////////////////\n")
