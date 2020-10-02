@@ -5,6 +5,21 @@ import (
 	"strings"
 )
 
+func GenerateBaseRepository() string {
+	buf := []string{}
+	buf = append(buf, "package _base\n")
+
+	buf = append(buf, "import (")
+	buf = append(buf, "\t\"github.com/ez-connect/go-rest/rest\"")
+	buf = append(buf, ")\n")
+
+	buf = append(buf, "type RepositoryBase struct {")
+	buf = append(buf, "\trest.RepositoryBase")
+	buf = append(buf, "}\n")
+
+	return strings.Join(buf, "\n")
+}
+
 func GenerateRepository(packageName string, config Config) string {
 	buf := []string{}
 	buf = append(buf, fmt.Sprintf("package %s\n", packageName))
@@ -48,10 +63,11 @@ func GenerateRepositoryExt(packageName string) string {
 
 	buf = append(buf, "import (")
 	buf = append(buf, "\t\"github.com/ez-connect/go-rest/rest\"")
+	buf = append(buf, "\t\"app/services/_base\"")
 	buf = append(buf, ")\n")
 
 	buf = append(buf, "type Repository struct {")
-	buf = append(buf, "\trest.RepositoryBase")
+	buf = append(buf, "\t_base.RepositoryBase")
 	buf = append(buf, "\trest.RepositoryInterface")
 	buf = append(buf, "}\n")
 

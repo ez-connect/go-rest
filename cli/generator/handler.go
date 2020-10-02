@@ -56,6 +56,21 @@ var delete = `func (h *Handler) Delete%s(c echo.Context) error {
 }
 `
 
+func GenerateBaseHandler() string {
+	buf := []string{}
+	buf = append(buf, "package _base\n")
+
+	buf = append(buf, "import (")
+	buf = append(buf, "\t\"github.com/ez-connect/go-rest/core\"")
+	buf = append(buf, ")\n")
+
+	buf = append(buf, "type HandlerBase struct {")
+	buf = append(buf, "\trest.HandlerBase")
+	buf = append(buf, "}\n")
+
+	return strings.Join(buf, "\n")
+}
+
 func GenerateHandler(packageName string) string {
 	buf := []string{}
 	buf = append(buf, fmt.Sprintf("package %s\n", packageName))
@@ -89,11 +104,11 @@ func GenerateHandlerExt(packageName string) string {
 	buf = append(buf, fmt.Sprintf("package %s\n", packageName))
 
 	buf = append(buf, "import (")
-	buf = append(buf, "\t\"github.com/ez-connect/go-rest/rest\"")
+	buf = append(buf, "\t\"app/services/_base\"")
 	buf = append(buf, ")\n")
 
 	buf = append(buf, "type Handler struct {")
-	buf = append(buf, "\trest.HandlerBase")
+	buf = append(buf, "\t_base.HandlerBase")
 	buf = append(buf, "\tRepo Repository")
 	buf = append(buf, "}\n")
 
