@@ -28,32 +28,35 @@ func GenerateSettings(packageName string) string {
 				Fields: []string{"price"},
 			},
 		},
-		Routes: []RouteGroup{
-			{
-				Path: fmt.Sprintf("/%ss", packageName),
-				Children: []RouteConfig{
-					{
-						Method:  http.MethodGet,
-						Handler: fmt.Sprintf("Find%s", strings.Title(packageName)),
-					},
-					{
-						Method:  http.MethodPost,
-						Handler: fmt.Sprintf("Insert%s", strings.Title(packageName)),
-					},
-					{
-						Method:  http.MethodGet,
-						Path:    "/:Id",
-						Handler: fmt.Sprintf("FindOne%s", strings.Title(packageName)),
-					},
-					{
-						Method:  http.MethodPut,
-						Path:    "/:Id",
-						Handler: fmt.Sprintf("Update%s", strings.Title(packageName)),
-					},
-					{
-						Method:  http.MethodDelete,
-						Path:    "/:Id",
-						Handler: fmt.Sprintf("Delete%s", strings.Title(packageName)),
+		RouteFile: RouteFileConfig{
+			[]string{},
+			[]RouteGroup{
+				{
+					Path: fmt.Sprintf("/%ss", packageName),
+					Children: []RouteConfig{
+						{
+							Method:  http.MethodGet,
+							Handler: fmt.Sprintf("Find%s", strings.Title(packageName)),
+						},
+						{
+							Method:  http.MethodPost,
+							Handler: fmt.Sprintf("Insert%s", strings.Title(packageName)),
+						},
+						{
+							Method:  http.MethodGet,
+							Path:    "/:Id",
+							Handler: fmt.Sprintf("FindOne%s", strings.Title(packageName)),
+						},
+						{
+							Method:  http.MethodPut,
+							Path:    "/:Id",
+							Handler: fmt.Sprintf("Update%s", strings.Title(packageName)),
+						},
+						{
+							Method:  http.MethodDelete,
+							Path:    "/:Id",
+							Handler: fmt.Sprintf("Delete%s", strings.Title(packageName)),
+						},
 					},
 				},
 			},
