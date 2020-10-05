@@ -46,7 +46,7 @@ func (h *HandlerBase) Find(c echo.Context,
 
 	err = h.db.Find(h.collection, filter, option, projection, docs)
 
-	// err = h.LifeCycle.AfterFind(c, err, docs)
+	err = h.LifeCycle.AfterFind(c, err, docs)
 
 	if err == nil {
 		total, _ := h.db.Count(h.collection, filter)
