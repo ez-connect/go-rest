@@ -27,7 +27,8 @@ var (
 func validateMap(v map[string]interface{}, rv reflect.Value) bson.M {
 	result := bson.M{}
 	for key, value := range v {
-		field := rv.FieldByName(key)
+		fieldName := strings.Title(key)
+		field := rv.FieldByName(fieldName)
 		if !field.IsValid() && core.IndexOf(keywords, key) < 0 {
 			return nil
 		}
@@ -47,7 +48,7 @@ func validateMap(v map[string]interface{}, rv reflect.Value) bson.M {
 			}
 
 			// get name of field from bson
-			st, found := rv.Type().FieldByName(key)
+			st, found := rv.Type().FieldByName(fieldName)
 			if found {
 				bsonInfo := strings.Split(st.Tag.Get("bson"), ",")
 				if len(bsonInfo) > 0 && bsonInfo[0] != "" {
@@ -141,13 +142,14 @@ func UnmarshalPathParams(params map[string]string, v interface{}) map[string]int
 
 	res := bson.M{}
 	for key, value := range params {
-		field := rv.FieldByName(key)
+		fieldName := strings.Title(key)
+		field := rv.FieldByName(fieldName)
 		if !field.IsValid() {
 			return nil
 		}
 
 		// get name of field from bson
-		st, found := rv.Type().FieldByName(key)
+		st, found := rv.Type().FieldByName(fieldName)
 		if found {
 			bsonInfo := strings.Split(st.Tag.Get("bson"), ",")
 			if len(bsonInfo) > 0 && bsonInfo[0] != "" {

@@ -32,9 +32,16 @@ type Index struct {
 	Unique bool     `yaml:"unique,omitempty"`
 }
 
+// config for route
+type RouteFileConfig struct {
+	Imports []string
+	Routes  []RouteGroup
+}
+
 type RouteGroup struct {
-	Path     string
-	Children []RouteConfig
+	Path           string
+	MiddlewareFunc string
+	Children       []RouteConfig
 }
 
 type RouteConfig struct {
@@ -49,5 +56,5 @@ type Config struct {
 	Model       ModelConfig
 	EmbedModels []ModelConfig `yaml:"embedModels"`
 	Indexes     []Index
-	Routes      []RouteGroup
+	RouteFile   RouteFileConfig
 }
