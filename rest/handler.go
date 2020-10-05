@@ -119,13 +119,13 @@ func (h *HandlerBase) Insert(c echo.Context, doc interface{}) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	// Vaildate on insert only
-	if err := c.Validate(doc); err != nil {
+	err := h.LifeCycle.BeforeInsert(c, doc)
+	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	err := h.LifeCycle.BeforeInsert(c, doc)
-	if err != nil {
+	// Vaildate on insert only
+	if err := c.Validate(doc); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
