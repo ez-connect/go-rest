@@ -42,17 +42,17 @@ func GenerateSettings(packageName string) string {
 					},
 					{
 						Method:  http.MethodGet,
-						Path:    "/:id",
+						Path:    "/:Id",
 						Handler: fmt.Sprintf("FindOne%s", strings.Title(packageName)),
 					},
 					{
 						Method:  http.MethodPut,
-						Path:    "/:id",
+						Path:    "/:Id",
 						Handler: fmt.Sprintf("Update%s", strings.Title(packageName)),
 					},
 					{
 						Method:  http.MethodDelete,
-						Path:    "/:id",
+						Path:    "/:Id",
 						Handler: fmt.Sprintf("Delete%s", strings.Title(packageName)),
 					},
 				},
