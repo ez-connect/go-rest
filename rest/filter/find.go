@@ -4,24 +4,41 @@ import (
 	"github.com/ez-connect/go-rest/db"
 	"github.com/labstack/echo/v4"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func Find(c echo.Context, v interface{}) bson.M {
-	query := c.QueryParam("q")
+	queryParams := GetQueryParam(c, v)
+	pathParams := GetPathParam(c, v)
+	if pathParams != nil && queryParams != nil {
+		return bson.M{"$and": []bson.M{pathParams, queryParams}}
+	} else if pathParams != nil {
+		return pathParams
+	} else if queryParams != nil {
+		return queryParams
+	} else {
+		return nil
+	}
+}
+
+func FindOne(c echo.Context, v interface{}) bson.M {
+	return GetPathParam(c, v)
+}
+
+func GetQueryParam(c echo.Context, v interface{}) bson.M {
+	query := c.QueryParam("filter")
 	if query == "" {
 		return nil
 	}
-	return Unmarshal(query, v)
+	return UnmarshalQueryParam(query, v)
 }
 
-func FindOne(c echo.Context) bson.M {
-	id, err := primitive.ObjectIDFromHex(c.Param("id"))
-	if err != nil {
-		return nil
+func GetPathParam(c echo.Context, v interface{}) bson.M {
+	params := map[string]string{}
+	for _, paramName := range c.ParamNames() {
+		params[paramName] = c.Param(paramName)
 	}
 
-	return bson.M{"_id": id}
+	return UnmarshalPathParams(params, v)
 }
 
 func Option(c echo.Context) db.FindOption {
