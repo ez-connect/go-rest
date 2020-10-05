@@ -23,7 +23,7 @@ var insert = `func (h *Handler) Insert%s(c echo.Context) error {
 `
 
 var findOne = `func (h *Handler) FindOne%s(c echo.Context) error {
-	f := filter.FindOne(c)
+	f := filter.FindOne(c, &Model{})
 	if f == nil {
 		return echo.NewHTTPError(http.StatusBadRequest)
 	}
@@ -34,7 +34,7 @@ var findOne = `func (h *Handler) FindOne%s(c echo.Context) error {
 `
 
 var update = `func (h *Handler) Update%s(c echo.Context) error {
-	f := filter.FindOne(c)
+	f := filter.FindOne(c, &Model{})
 	if f == nil {
 		return echo.NewHTTPError(http.StatusBadRequest)
 	}
@@ -47,7 +47,7 @@ var update = `func (h *Handler) Update%s(c echo.Context) error {
 `
 
 var delete = `func (h *Handler) Delete%s(c echo.Context) error {
-	f := filter.FindOne(c)
+	f := filter.FindOne(c, &Model{})
 	if f == nil {
 		return echo.NewHTTPError(http.StatusBadRequest)
 	}

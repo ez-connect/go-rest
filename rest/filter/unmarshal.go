@@ -111,7 +111,7 @@ func validateArray(v []interface{}, rv reflect.Value) []interface{} {
 	return result
 }
 
-func Unmarshal(query string, v interface{}) map[string]interface{} {
+func UnmarshalQueryParam(query string, v interface{}) map[string]interface{} {
 	buf := bytes.NewBufferString(query)
 	if !json.Valid(buf.Bytes()) {
 		return nil
@@ -129,4 +129,57 @@ func Unmarshal(query string, v interface{}) map[string]interface{} {
 
 	// validate query
 	return validateMap(res, rv.Elem())
+}
+
+func UnmarshalPathParams(params map[string]string, v interface{}) map[string]interface{} {
+	rv := reflect.ValueOf(v)
+	if rv.Kind() != reflect.Ptr || rv.IsNil() {
+		return nil
+	}
+
+	rv = rv.Elem()
+
+	res := bson.M{}
+	for key, value := range params {
+		field := rv.FieldByName(key)
+		if !field.IsValid() {
+			return nil
+		}
+
+		// get name of field from bson
+		st, found := rv.Type().FieldByName(key)
+		if found {
+			bsonInfo := strings.Split(st.Tag.Get("bson"), ",")
+			if len(bsonInfo) > 0 && bsonInfo[0] != "" {
+				key = bsonInfo[0]
+			}
+		}
+
+		isObjectId := false
+
+		// check field is objectId
+		switch field.Kind() {
+		case reflect.Ptr:
+			isObjectId = field.Type().Elem() == objectIdType
+		case reflect.Struct:
+			isObjectId = field.Type() == objectIdType
+		}
+
+		if isObjectId {
+			objectId, err := primitive.ObjectIDFromHex(value)
+			if err != nil {
+				return nil
+			}
+			switch field.Kind() {
+			case reflect.Ptr:
+				res[key] = &objectId
+			case reflect.Struct:
+				res[key] = objectId
+			}
+		} else {
+			res[key] = value
+		}
+	}
+
+	return res
 }
