@@ -12,7 +12,12 @@ func GenerateModel(packageName string, config Config) string {
 	buf = append(buf, "import (")
 	buf = append(buf, "\t\"time\"\n")
 	buf = append(buf, "\t\"go.mongodb.org/mongo-driver/bson/primitive\"\n")
+
 	// buf = append(buf, fmt.Sprintf("\t\"app/services/%s\"", packageName))
+	for _, v := range config.Import.Model {
+		buf = append(buf, fmt.Sprintf("\t\"%s\"", v))
+	}
+
 	buf = append(buf, ")\n")
 
 	buf = append(buf, fmt.Sprintf("const CollectionName = \"%s\"\n", config.Model.Name))
@@ -57,7 +62,7 @@ func GenerateModel(packageName string, config Config) string {
 	return strings.Join(buf, "\n")
 }
 
-func GenerateModelExt(packageName string) string {
+func GenerateModelService(packageName string) string {
 	buf := []string{}
 	buf = append(buf, fmt.Sprintf("package %s\n", packageName))
 	buf = append(buf, "import (")

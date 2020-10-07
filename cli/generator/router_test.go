@@ -10,16 +10,13 @@ func TestGenerateRoutes(t *testing.T) {
 	v := GenerateRoutes(
 		"test",
 		Config{
-			RouteFile: RouteFileConfig{
-				Imports: []string{},
-				Routes: []RouteGroup{
-					{
-						Path: "hello",
-						Children: []RouteConfig{
-							{
-								Method:  "GET",
-								Handler: "Find",
-							},
+			Routes: []RouteGroup{
+				{
+					Path: "hello",
+					Children: []RouteConfig{
+						{
+							Method:  "GET",
+							Handler: "Find",
 						},
 					},
 				},
