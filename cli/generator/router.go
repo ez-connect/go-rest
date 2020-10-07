@@ -55,7 +55,7 @@ func GenerateRoutesExt(packageName string) string {
 	buf = append(buf, fmt.Sprintf("package %s\n", packageName))
 
 	buf = append(buf, "import (")
-	buf = append(buf, "\t\"github.com/ez-connect/go-rest/rest\"")
+	// buf = append(buf, "\t\"github.com/ez-connect/go-rest/rest\"")
 	buf = append(buf, fmt.Sprintf("\t\"app/generated/%s\"", packageName))
 	buf = append(buf, ")\n")
 
