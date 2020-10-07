@@ -6,42 +6,27 @@ import (
 	"os"
 )
 
-func GenerateBase(workingDir, fileType string) {
+type FileType string
+
+const (
+	Settings FileType = "settings.yml"
+
+	Model      FileType = "model.go"
+	Repository FileType = "repository.go"
+	Handler    FileType = "handler.go"
+	Router     FileType = "router.go"
+)
+
+func GenerateFile(workingDir, packageName string, fileType FileType, config Config) {
 	var v string
 	switch fileType {
-	case "handler":
-		v = GenerateBaseHandler()
-	case "repository":
-		v = GenerateBaseRepository()
-	default:
-		log.Fatal("Not support type:", fileType)
-	}
-
-	filename := fmt.Sprintf("%s/services/_base/%s.go", workingDir, fileType)
-	fmt.Println(filename)
-	f, err := os.Create(filename)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer f.Close()
-
-	_, err = f.WriteString(v)
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-func GenerateFile(workingDir, packageName, fileType string, config Config) {
-	var v string
-	switch fileType {
-	case "model.go":
+	case Model:
 		v = GenerateModel(packageName, config)
-	case "repository.go":
+	case Repository:
 		v = GenerateRepository(packageName, config)
-	case "handler.go":
-		v = GenerateHandler(packageName)
-	case "router.go":
+	case Handler:
+		v = GenerateHandler(packageName, config)
+	case Router:
 		v = GenerateRoutes(packageName, config)
 	default:
 		log.Fatal("Not support type:", fileType)
@@ -62,18 +47,18 @@ func GenerateFile(workingDir, packageName, fileType string, config Config) {
 	}
 }
 
-func GenerateFileExt(workingDir, packageName, fileType string) {
+func GenerateFileExt(workingDir, packageName string, fileType FileType) {
 	var v string
 	switch fileType {
-	case "settings.yml":
+	case Settings:
 		v = GenerateSettings(packageName)
-	case "model.go":
+	case Model:
 		v = GenerateModelExt(packageName)
-	case "repository.go":
+	case Repository:
 		v = GenerateRepositoryExt(packageName)
-	case "handler.go":
+	case Handler:
 		v = GenerateHandlerExt(packageName)
-	case "router.go":
+	case Router:
 		v = GenerateRoutesExt(packageName)
 	default:
 		log.Fatal("Not support type:", fileType)

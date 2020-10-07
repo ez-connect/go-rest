@@ -2,6 +2,14 @@ package generator
 
 import "github.com/ez-connect/go-rest/rest"
 
+// Import returns all imports of all files
+type Import struct {
+	Model      []string `yaml:"model,omitempty"`
+	Repository []string `yaml:"repository,omitempty"`
+	Handler    []string `yaml:"handler,omitempty"`
+	Router     []string `yaml:"router,omitempty"`
+}
+
 type Attribute struct {
 	Name      string `yaml:"name"`
 	Type      string `yaml:"type"`
@@ -49,9 +57,10 @@ type RouteConfig struct {
 }
 
 type Config struct {
-	Model       ModelConfig
-	EmbedModels []ModelConfig  `yaml:"embedModels,omitempty"`
-	LifeCycle   rest.LifeCycle `yaml:"lifeCycle,omitempty"`
-	Indexes     []Index        `yaml:"indexes,omitempty"`
+	Import      Import         `yaml:"import"`
+	Model       ModelConfig    `yaml:"model"`
+	EmbedModels []ModelConfig  `yaml:"embedModels"`
+	LifeCycle   rest.LifeCycle `yaml:"lifeCycle"`
+	Indexes     []Index        `yaml:"indexes"`
 	Routes      []RouteGroup   `yaml:"routes"`
 }

@@ -13,12 +13,11 @@ func GenerateRoutes(packageName string, config Config) string {
 	buf = append(buf, "\t\"github.com/ez-connect/go-rest/db\"")
 	buf = append(buf, "\t\"github.com/labstack/echo/v4\"\n")
 	buf = append(buf, "\t\"github.com/ez-connect/go-rest/rest\"")
-	// buf = append(buf, fmt.Sprintf("\t\"app/services/%s\"", packageName))
 
-	// // add import from settings
-	// for _, i := range config.RouteFile.Imports {
-	// 	buf = append(buf, fmt.Sprintf("\t\"%s\"\n", i))
-	// }
+	// buf = append(buf, fmt.Sprintf("\t\"app/services/%s\"", packageName))
+	for _, v := range config.Import.Model {
+		buf = append(buf, fmt.Sprintf("\t\"%s\"", v))
+	}
 
 	buf = append(buf, ")\n")
 
