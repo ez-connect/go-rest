@@ -12,7 +12,8 @@ func GenerateRoutes(packageName string, config Config) string {
 	buf = append(buf, "import (")
 	buf = append(buf, "\t\"github.com/ez-connect/go-rest/db\"")
 	buf = append(buf, "\t\"github.com/labstack/echo/v4\"\n")
-	buf = append(buf, fmt.Sprintf("\t\"app/services/%s\"", packageName))
+	buf = append(buf, "\t\"github.com/ez-connect/go-rest/rest\"")
+	// buf = append(buf, fmt.Sprintf("\t\"app/services/%s\"", packageName))
 
 	// add import from settings
 	for _, i := range config.RouteFile.Imports {
@@ -22,7 +23,8 @@ func GenerateRoutes(packageName string, config Config) string {
 	buf = append(buf, ")\n")
 
 	buf = append(buf, "type Router struct {")
-	buf = append(buf, fmt.Sprintf("\t%s.Router", packageName))
+	// buf = append(buf, fmt.Sprintf("\t%s.Router", packageName))
+	buf = append(buf, "\trest.RouterBase")
 	buf = append(buf, "}\n")
 
 	buf = append(buf, "func (r *Router) Init(e *echo.Echo, db db.DatabaseBase) {")
@@ -54,10 +56,12 @@ func GenerateRoutesExt(packageName string) string {
 
 	buf = append(buf, "import (")
 	buf = append(buf, "\t\"github.com/ez-connect/go-rest/rest\"")
+	buf = append(buf, fmt.Sprintf("\t\"app/generated/%s\"", packageName))
 	buf = append(buf, ")\n")
 
 	buf = append(buf, "type Router struct {")
-	buf = append(buf, "\trest.RouterBase")
+	buf = append(buf, fmt.Sprintf("\t%s.Router", packageName))
+	// buf = append(buf, "\trest.RouterBase")
 	buf = append(buf, "}\n")
 
 	return strings.Join(buf, "\n")
