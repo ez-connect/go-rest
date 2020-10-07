@@ -24,7 +24,7 @@ var (
 	objectIdType = reflect.TypeOf(primitive.NewObjectID())
 )
 
-func validateMap(v map[string]interface{}, rv reflect.Value) bson.M {
+func validateMap(v map[string]interface{}, rv reflect.Value, mustBeObjectId bool) bson.M {
 	result := bson.M{}
 	for key, value := range v {
 		fieldName := strings.Title(key)
@@ -43,10 +43,6 @@ func validateMap(v map[string]interface{}, rv reflect.Value) bson.M {
 				isObjectId = field.Type() == objectIdType
 			}
 
-			if isObjectId && reflect.TypeOf(value).Kind() != reflect.String {
-				return nil
-			}
-
 			// get name of field from bson
 			st, found := rv.Type().FieldByName(fieldName)
 			if found {
@@ -59,15 +55,15 @@ func validateMap(v map[string]interface{}, rv reflect.Value) bson.M {
 
 		switch value := value.(type) {
 		case map[string]interface{}:
-			if result[key] = validateMap(value, rv); result[key] == nil {
+			if result[key] = validateMap(value, rv, isObjectId || mustBeObjectId); result[key] == nil {
 				return nil
 			}
 		case []interface{}:
-			if result[key] = validateArray(value, rv); result[key] == nil {
+			if result[key] = validateArray(value, rv, isObjectId || mustBeObjectId); result[key] == nil {
 				return nil
 			}
 		case string:
-			if isObjectId {
+			if isObjectId || mustBeObjectId {
 				objectId, err := primitive.ObjectIDFromHex(value)
 				if err != nil {
 					return nil
@@ -82,31 +78,49 @@ func validateMap(v map[string]interface{}, rv reflect.Value) bson.M {
 				result[key] = value
 			}
 		default:
-			result[key] = value
+			if isObjectId || mustBeObjectId {
+				return nil
+			} else {
+				result[key] = value
+			}
 		}
 
 	}
 	return result
 }
 
-func validateArray(v []interface{}, rv reflect.Value) []interface{} {
+func validateArray(v []interface{}, rv reflect.Value, mustBeObjectId bool) []interface{} {
 	result := make([]interface{}, 0)
 	for value := range v {
 		switch x := v[value].(type) {
 		case map[string]interface{}:
-			t := validateMap(x, rv)
+			t := validateMap(x, rv, mustBeObjectId)
 			if t == nil {
 				return nil
 			}
 			result = append(result, t)
 		case []interface{}:
-			t := validateArray(x, rv)
+			t := validateArray(x, rv, mustBeObjectId)
 			if t == nil {
 				return nil
 			}
 			result = append(result, t)
+		case string:
+			if mustBeObjectId {
+				objectId, err := primitive.ObjectIDFromHex(x)
+				if err != nil {
+					return nil
+				}
+				result = append(result, objectId)
+			} else {
+				result = append(result, x)
+			}
 		default:
-			result = append(result, x)
+			if !mustBeObjectId {
+				result = append(result, x)
+			} else {
+				return nil
+			}
 		}
 	}
 	return result
@@ -129,7 +143,7 @@ func UnmarshalQueryParam(query string, v interface{}) map[string]interface{} {
 	}
 
 	// validate query
-	return validateMap(res, rv.Elem())
+	return validateMap(res, rv.Elem(), false)
 }
 
 func UnmarshalPathParams(params map[string]string, v interface{}) map[string]interface{} {
