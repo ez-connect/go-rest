@@ -15,7 +15,7 @@ func GenerateRoutes(packageName string, config Config) string {
 	buf = append(buf, "\t\"github.com/ez-connect/go-rest/rest\"")
 
 	// buf = append(buf, fmt.Sprintf("\t\"app/services/%s\"", packageName))
-	for _, v := range config.Import.Model {
+	for _, v := range config.Import.Router {
 		buf = append(buf, fmt.Sprintf("\t\"%s\"", v))
 	}
 
@@ -49,7 +49,7 @@ func GenerateRoutes(packageName string, config Config) string {
 	return strings.Join(buf, "\n")
 }
 
-func GenerateRoutesExt(packageName string) string {
+func GenerateRoutesService(packageName string) string {
 	buf := []string{}
 	buf = append(buf, fmt.Sprintf("package %s\n", packageName))
 

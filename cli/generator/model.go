@@ -62,7 +62,7 @@ func GenerateModel(packageName string, config Config) string {
 	return strings.Join(buf, "\n")
 }
 
-func GenerateModelExt(packageName string) string {
+func GenerateModelService(packageName string) string {
 	buf := []string{}
 	buf = append(buf, fmt.Sprintf("package %s\n", packageName))
 	buf = append(buf, "import (")

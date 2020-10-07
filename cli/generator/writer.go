@@ -53,13 +53,13 @@ func GenerateFileExt(workingDir, packageName string, fileType FileType) {
 	case Settings:
 		v = GenerateSettings(packageName)
 	case Model:
-		v = GenerateModelExt(packageName)
+		v = GenerateModelService(packageName)
 	case Repository:
-		v = GenerateRepositoryExt(packageName)
+		v = GenerateRepositoryService(packageName)
 	case Handler:
-		v = GenerateHandlerExt(packageName)
+		v = GenerateHandlerService(packageName)
 	case Router:
-		v = GenerateRoutesExt(packageName)
+		v = GenerateRoutesService(packageName)
 	default:
 		log.Fatal("Not support type:", fileType)
 	}

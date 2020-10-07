@@ -20,7 +20,7 @@ func GenerateRepository(packageName string, config Config) string {
 	buf = append(buf, "\trest.RepositoryInterface")
 
 	// buf = append(buf, fmt.Sprintf("\t%s.Repository", packageName))
-	for _, v := range config.Import.Model {
+	for _, v := range config.Import.Repository {
 		buf = append(buf, fmt.Sprintf("\t\"%s\"", v))
 	}
 
@@ -50,7 +50,7 @@ func GenerateRepository(packageName string, config Config) string {
 	return strings.Join(buf, "\n")
 }
 
-func GenerateRepositoryExt(packageName string) string {
+func GenerateRepositoryService(packageName string) string {
 	buf := []string{}
 	buf = append(buf, fmt.Sprintf("package %s\n", packageName))
 
