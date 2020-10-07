@@ -1,6 +1,9 @@
 package filter
 
 import (
+	"strconv"
+	"strings"
+
 	"github.com/ez-connect/go-rest/db"
 	"github.com/labstack/echo/v4"
 	"go.mongodb.org/mongo-driver/bson"
@@ -42,5 +45,18 @@ func GetPathParam(c echo.Context, v interface{}) bson.M {
 }
 
 func Option(c echo.Context) db.FindOption {
-	return db.FindOption{}
+	options := db.FindOption{Skip: 0}
+	if order := c.QueryParam("_order"); order != "" {
+		options.Order = strings.ToLower(order)
+	}
+	if sort := c.QueryParam("_sort"); sort != "" {
+		options.Sort = sort
+	}
+	if start, err := strconv.Atoi(c.QueryParam("_start")); err == nil {
+		options.Skip = int64(start)
+	}
+	if end, err := strconv.Atoi(c.QueryParam("_end")); err == nil {
+		options.Limit = int64(end) - options.Skip
+	}
+	return options
 }
