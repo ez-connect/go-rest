@@ -1,5 +1,7 @@
 package generator
 
+import "github.com/ez-connect/go-rest/rest"
+
 type Attribute struct {
 	Name      string `yaml:"name"`
 	Type      string `yaml:"type"`
@@ -32,12 +34,6 @@ type Index struct {
 	Unique bool     `yaml:"unique,omitempty"`
 }
 
-// config for route
-type RouteFileConfig struct {
-	Imports []string
-	Routes  []RouteGroup
-}
-
 type RouteGroup struct {
 	Path           string
 	MiddlewareFunc string
@@ -54,7 +50,8 @@ type RouteConfig struct {
 
 type Config struct {
 	Model       ModelConfig
-	EmbedModels []ModelConfig `yaml:"embedModels"`
-	Indexes     []Index
-	RouteFile   RouteFileConfig
+	EmbedModels []ModelConfig  `yaml:"embedModels,omitempty"`
+	LifeCycle   rest.LifeCycle `yaml:"lifeCycle,omitempty"`
+	Indexes     []Index        `yaml:"indexes,omitempty"`
+	Routes      []RouteGroup   `yaml:"routes"`
 }
