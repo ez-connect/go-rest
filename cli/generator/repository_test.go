@@ -8,7 +8,8 @@ import (
 
 func TestGenerateRepository(t *testing.T) {
 	v := GenerateRepository(
-		"test", Config{
+		"test",
+		Config{
 			Indexes: []Index{},
 		},
 	)

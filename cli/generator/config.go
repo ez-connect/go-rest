@@ -1,5 +1,13 @@
 package generator
 
+// Import returns all imports of all files
+type Import struct {
+	Model      []string `yaml:"model,omitempty"`
+	Repository []string `yaml:"repository,omitempty"`
+	Handler    []string `yaml:"handler,omitempty"`
+	Router     []string `yaml:"router,omitempty"`
+}
+
 type Attribute struct {
 	Name      string `yaml:"name"`
 	Type      string `yaml:"type"`
@@ -32,12 +40,6 @@ type Index struct {
 	Unique bool     `yaml:"unique,omitempty"`
 }
 
-// config for route
-type RouteFileConfig struct {
-	Imports []string
-	Routes  []RouteGroup
-}
-
 type RouteGroup struct {
 	Path           string
 	MiddlewareFunc string
@@ -53,8 +55,10 @@ type RouteConfig struct {
 }
 
 type Config struct {
-	Model       ModelConfig
+	Import      Import        `yaml:"import"`
+	Model       ModelConfig   `yaml:"model"`
 	EmbedModels []ModelConfig `yaml:"embedModels"`
-	Indexes     []Index
-	RouteFile   RouteFileConfig
+	Indexes     []Index       `yaml:"indexes"`
+	Routes      []RouteGroup  `yaml:"routes"`
+	LifeCycle   string        `yaml:"lifeCycle"`
 }
