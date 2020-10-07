@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/ez-connect/go-rest/cli/generator"
 	"github.com/ez-connect/go-rest/core"
@@ -61,7 +62,7 @@ func main() {
 	}
 
 	for _, dir := range dirs {
-		if dir.IsDir() && dir.Name() != "_base" {
+		if dir.IsDir() && strings.Index(dir.Name(), "_") != 0 {
 			fmt.Println(workingDir, "/services/", dir.Name())
 			config := generator.Config{}
 			err := core.LoadConfig(fmt.Sprintf("%s/services/%s/settings.yml", workingDir, dir.Name()), &config)
