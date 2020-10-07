@@ -58,21 +58,24 @@ func (h *HandlerBase) Find(c echo.Context,
 func (h *HandlerBase) FindOne(c echo.Context,
 	filter, projection interface{}, doc interface{}) error {
 
-	err := h.lifeCycle.BeforeFindOne(c, filter, projection)
-	if err != nil {
+	if h.lifeCycle.BeforeFindOne != nil {
+		err := h.lifeCycle.BeforeFindOne(c, filter, projection)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+	}
+
+	if err := h.db.FindOne(h.collection, filter, projection, doc); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	err = h.db.FindOne(h.collection, filter, projection, doc)
-
-	err = h.lifeCycle.AfterFindOne(c, err, doc)
-
-	if err == nil {
-		return c.JSON(http.StatusOK, doc)
+	if h.lifeCycle.AfterFindOne != nil {
+		if err := h.lifeCycle.AfterFindOne(c, doc); err != nil {
+			return echo.NewHTTPError(http.StatusNotFound)
+		}
 	}
 
-	c.Logger().Debug(err)
-	return echo.NewHTTPError(http.StatusNotFound)
+	return c.JSON(http.StatusOK, doc)
 }
 
 func (h *HandlerBase) Aggregate(c echo.Context,
@@ -117,9 +120,10 @@ func (h *HandlerBase) Insert(c echo.Context, doc interface{}) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	err := h.lifeCycle.BeforeInsert(c, doc)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	if h.lifeCycle.BeforeInsert != nil {
+		if err := h.lifeCycle.BeforeInsert(c, doc); err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
 	}
 
 	// Vaildate on insert only
@@ -128,11 +132,14 @@ func (h *HandlerBase) Insert(c echo.Context, doc interface{}) error {
 	}
 
 	res, err := h.db.Insert(h.collection, doc)
-
-	err = h.lifeCycle.AfterInsert(c, err, doc)
-
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	if h.lifeCycle.AfterInsert != nil {
+		if err := h.lifeCycle.AfterInsert(c, doc); err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
 	}
 
 	return c.JSON(http.StatusCreated, res)
@@ -145,35 +152,42 @@ func (h *HandlerBase) UpdateOne(c echo.Context,
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	err := h.lifeCycle.BeforeUpdateOne(c, filter, doc)
+	if h.lifeCycle.BeforeUpdateOne != nil {
+		if err := h.lifeCycle.BeforeUpdateOne(c, filter, doc); err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+	}
+
+	res, err := h.db.UpdateOne(h.collection, filter, bson.M{"$set": doc})
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	res, err := h.db.UpdateOne(h.collection, filter, bson.M{"$set": doc})
-
-	err = h.lifeCycle.AfterUpdateOne(c, err, doc)
-
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	if h.lifeCycle.AfterUpdateOne != nil {
+		if err := h.lifeCycle.AfterUpdateOne(c, doc); err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
 	}
 
 	return c.JSON(http.StatusOK, res)
 }
 
 func (h *HandlerBase) DeleteOne(c echo.Context, filter interface{}) error {
+	if h.lifeCycle.BeforeDeleteOne != nil {
+		if err := h.lifeCycle.BeforeDeleteOne(c, filter); err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+	}
 
-	err := h.lifeCycle.BeforeDeleteOne(c, filter)
+	res, err := h.db.DeleteOne(h.collection, filter)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	res, err := h.db.DeleteOne(h.collection, filter)
-
-	err = h.lifeCycle.AfterDeleteOne(c, err, res)
-
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	if h.lifeCycle.AfterDeleteOne != nil {
+		if err := h.lifeCycle.AfterDeleteOne(c, res); err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
 	}
 
 	return c.JSON(http.StatusOK, res)
