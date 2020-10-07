@@ -9,6 +9,7 @@ import (
 func TestGenerateHandler(t *testing.T) {
 	v := GenerateHandler(
 		"test",
+		Config{},
 	)
 
 	assert.NotEmpty(t, v)
