@@ -29,10 +29,18 @@ func FindOne(c echo.Context, v interface{}) bson.M {
 
 func GetQueryParam(c echo.Context, v interface{}) bson.M {
 	query := c.QueryParam("filter")
-	if query == "" {
-		return nil
+	if query != "" {
+		return UnmarshalQueryParam(query, v)
+	} else {
+		params := map[string]string{}
+		for paramName, param := range c.QueryParams() {
+			if len(param) > 0 && !strings.HasPrefix(paramName, "_") {
+				params[paramName] = param[0]
+			}
+		}
+
+		return UnmarshalPathParams(params, v)
 	}
-	return UnmarshalQueryParam(query, v)
 }
 
 func GetPathParam(c echo.Context, v interface{}) bson.M {
