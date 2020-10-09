@@ -7,6 +7,8 @@ import (
 	"github.com/ez-connect/go-rest/db"
 	"github.com/labstack/echo/v4"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 ///////////////////////////////////////////////////////////////////
@@ -147,6 +149,9 @@ func (h *HandlerBase) Insert(c echo.Context, doc interface{}) error {
 		}
 	}
 
+	if result, ok := res.(*mongo.InsertOneResult); ok {
+		res = map[string]primitive.ObjectID{"id": result.InsertedID.(primitive.ObjectID)}
+	}
 	return c.JSON(http.StatusCreated, res)
 }
 
