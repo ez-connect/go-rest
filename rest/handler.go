@@ -37,14 +37,19 @@ func (h *HandlerBase) Find(c echo.Context,
 	filter interface{}, option db.FindOption,
 	projection, docs interface{}) error {
 
-	// err := h.LifeCycle.BeforeFind(c, &filter, &option, &projection)
-	// if err != nil {
-	// 	return echo.NewHTTPError(http.StatusServiceUnavailable, err.Error())
-	// }
+	if h.lifeCycle.BeforeFind != nil {
+		if err := h.lifeCycle.BeforeFind(c, &filter, &option, &projection); err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+	}
 
 	err := h.db.Find(h.collection, filter, option, projection, docs)
 
-	// err = h.LifeCycle.AfterFind(c, err, docs)
+	if h.lifeCycle.AfterFind != nil {
+		if err := h.lifeCycle.BeforeFind(c, &filter, &option, &projection); err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+	}
 
 	if err == nil {
 		total, _ := h.db.Count(h.collection, filter)

@@ -12,7 +12,11 @@ var lifecycle = `func (h *Handler) Init(db db.DatabaseBase, collection string) {
 `
 
 var find = `func (h *Handler) Find%s(c echo.Context) error {
-	f := filter.Find(c, &Model{})
+	f, err := filter.Find(c, &Model{})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+
 	o := filter.Option(c)
 	docs := []Model{}
 	return h.Find(c, f, o, nil, &docs)
@@ -29,8 +33,8 @@ var insert = `func (h *Handler) Insert%s(c echo.Context) error {
 `
 
 var findOne = `func (h *Handler) FindOne%s(c echo.Context) error {
-	f := filter.FindOne(c, &Model{})
-	if f == nil {
+	f, err := filter.FindOne(c, &Model{})
+	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest)
 	}
 
@@ -40,8 +44,8 @@ var findOne = `func (h *Handler) FindOne%s(c echo.Context) error {
 `
 
 var update = `func (h *Handler) Update%s(c echo.Context) error {
-	f := filter.FindOne(c, &Model{})
-	if f == nil {
+	f, err := filter.FindOne(c, &Model{})
+	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest)
 	}
 
@@ -53,8 +57,8 @@ var update = `func (h *Handler) Update%s(c echo.Context) error {
 `
 
 var delete = `func (h *Handler) Delete%s(c echo.Context) error {
-	f := filter.FindOne(c, &Model{})
-	if f == nil {
+	f, err := filter.FindOne(c, &Model{})
+	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest)
 	}
 

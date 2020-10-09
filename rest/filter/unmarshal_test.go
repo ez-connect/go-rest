@@ -13,7 +13,7 @@ type xxx struct {
 }
 
 func TestUnmarshal(t *testing.T) {
-	query := UnmarshalQueryParam(`{
+	query, err := UnmarshalQueryParam(`{
 		"$and": [
 			{"abc": "xyz"},
 			{"id": "5f6b0b42d59a0aa2d1906fd2"},
@@ -26,4 +26,5 @@ func TestUnmarshal(t *testing.T) {
 		]
 	}`, &xxx{})
 	assert.NotNil(t, query)
+	assert.Nil(t, err)
 }

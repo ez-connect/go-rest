@@ -9,25 +9,33 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func Find(c echo.Context, v interface{}) bson.M {
-	queryParams := GetQueryParam(c, v)
-	pathParams := GetPathParam(c, v)
+func Find(c echo.Context, v interface{}) (bson.M, error) {
+	queryParams, err := GetQueryParam(c, v)
+	if err != nil {
+		return nil, err
+	}
+
+	pathParams, err := GetPathParam(c, v)
+	if err != nil {
+		return nil, err
+	}
+
 	if pathParams != nil && queryParams != nil {
-		return bson.M{"$and": []bson.M{pathParams, queryParams}}
+		return bson.M{"$and": []bson.M{pathParams, queryParams}}, nil
 	} else if pathParams != nil {
-		return pathParams
+		return pathParams, nil
 	} else if queryParams != nil {
-		return queryParams
+		return queryParams, nil
 	} else {
-		return nil
+		return bson.M{}, nil
 	}
 }
 
-func FindOne(c echo.Context, v interface{}) bson.M {
+func FindOne(c echo.Context, v interface{}) (bson.M, error) {
 	return GetPathParam(c, v)
 }
 
-func GetQueryParam(c echo.Context, v interface{}) bson.M {
+func GetQueryParam(c echo.Context, v interface{}) (bson.M, error) {
 	query := c.QueryParam("filter")
 	if query != "" {
 		return UnmarshalQueryParam(query, v)
@@ -43,7 +51,7 @@ func GetQueryParam(c echo.Context, v interface{}) bson.M {
 	}
 }
 
-func GetPathParam(c echo.Context, v interface{}) bson.M {
+func GetPathParam(c echo.Context, v interface{}) (bson.M, error) {
 	params := map[string]string{}
 	for _, paramName := range c.ParamNames() {
 		params[paramName] = c.Param(paramName)
