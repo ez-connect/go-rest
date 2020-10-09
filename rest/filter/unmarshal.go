@@ -3,6 +3,8 @@ package filter
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"reflect"
 	"strings"
 
@@ -24,13 +26,13 @@ var (
 	objectIdType = reflect.TypeOf(primitive.NewObjectID())
 )
 
-func validateMap(v map[string]interface{}, rv reflect.Value, mustBeObjectId bool) bson.M {
+func validateMap(v map[string]interface{}, rv reflect.Value, mustBeObjectId bool) (bson.M, error) {
 	result := bson.M{}
 	for key, value := range v {
 		fieldName := strings.Title(key)
 		field := rv.FieldByName(fieldName)
 		if !field.IsValid() && core.IndexOf(keywords, key) < 0 {
-			return nil
+			return nil, errors.New(fmt.Sprintf("Fields/keyword %s is not exist", key))
 		}
 
 		isObjectId := false
@@ -53,20 +55,22 @@ func validateMap(v map[string]interface{}, rv reflect.Value, mustBeObjectId bool
 			}
 		}
 
+		var err error
 		switch value := value.(type) {
 		case map[string]interface{}:
-			if result[key] = validateMap(value, rv, isObjectId || mustBeObjectId); result[key] == nil {
-				return nil
+			result[key], err = validateMap(value, rv, isObjectId || mustBeObjectId)
+			if err != nil {
+				return nil, err
 			}
 		case []interface{}:
-			if result[key] = validateArray(value, rv, isObjectId || mustBeObjectId); result[key] == nil {
-				return nil
+			if result[key], err = validateArray(value, rv, isObjectId || mustBeObjectId); err != nil {
+				return nil, err
 			}
 		case string:
 			if isObjectId || mustBeObjectId {
 				objectId, err := primitive.ObjectIDFromHex(value)
 				if err != nil {
-					return nil
+					return nil, err
 				}
 				switch field.Kind() {
 				case reflect.Ptr:
@@ -79,37 +83,37 @@ func validateMap(v map[string]interface{}, rv reflect.Value, mustBeObjectId bool
 			}
 		default:
 			if isObjectId || mustBeObjectId {
-				return nil
+				return nil, errors.New(fmt.Sprintf("Field %s must be objectid string", key))
 			} else {
 				result[key] = value
 			}
 		}
 
 	}
-	return result
+	return result, nil
 }
 
-func validateArray(v []interface{}, rv reflect.Value, mustBeObjectId bool) []interface{} {
+func validateArray(v []interface{}, rv reflect.Value, mustBeObjectId bool) ([]interface{}, error) {
 	result := make([]interface{}, 0)
 	for value := range v {
 		switch x := v[value].(type) {
 		case map[string]interface{}:
-			t := validateMap(x, rv, mustBeObjectId)
-			if t == nil {
-				return nil
+			t, err := validateMap(x, rv, mustBeObjectId)
+			if err != nil {
+				return nil, err
 			}
 			result = append(result, t)
 		case []interface{}:
-			t := validateArray(x, rv, mustBeObjectId)
-			if t == nil {
-				return nil
+			t, err := validateArray(x, rv, mustBeObjectId)
+			if err != nil {
+				return nil, err
 			}
 			result = append(result, t)
 		case string:
 			if mustBeObjectId {
 				objectId, err := primitive.ObjectIDFromHex(x)
 				if err != nil {
-					return nil
+					return nil, err
 				}
 				result = append(result, objectId)
 			} else {
@@ -119,37 +123,37 @@ func validateArray(v []interface{}, rv reflect.Value, mustBeObjectId bool) []int
 			if !mustBeObjectId {
 				result = append(result, x)
 			} else {
-				return nil
+				return nil, errors.New("value must be objectid")
 			}
 		}
 	}
-	return result
+	return result, nil
 }
 
-func UnmarshalQueryParam(query string, v interface{}) map[string]interface{} {
+func UnmarshalQueryParam(query string, v interface{}) (map[string]interface{}, error) {
 	buf := bytes.NewBufferString(query)
 	if !json.Valid(buf.Bytes()) {
-		return nil
+		return nil, errors.New("Filter must be json")
 	}
 	rv := reflect.ValueOf(v)
 	if rv.Kind() != reflect.Ptr || rv.IsNil() {
-		return nil
+		return nil, errors.New("Internal server error")
 	}
 
 	res := bson.M{}
 	err := json.Unmarshal(buf.Bytes(), &res)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
 	// validate query
 	return validateMap(res, rv.Elem(), false)
 }
 
-func UnmarshalPathParams(params map[string]string, v interface{}) map[string]interface{} {
+func UnmarshalPathParams(params map[string]string, v interface{}) (map[string]interface{}, error) {
 	rv := reflect.ValueOf(v)
 	if rv.Kind() != reflect.Ptr || rv.IsNil() {
-		return nil
+		return nil, errors.New("Internal server error")
 	}
 
 	rv = rv.Elem()
@@ -159,7 +163,7 @@ func UnmarshalPathParams(params map[string]string, v interface{}) map[string]int
 		fieldName := strings.Title(key)
 		field := rv.FieldByName(fieldName)
 		if !field.IsValid() {
-			return nil
+			return nil, errors.New(fmt.Sprintf("Field %s is not exist", key))
 		}
 
 		// get name of field from bson
@@ -184,7 +188,7 @@ func UnmarshalPathParams(params map[string]string, v interface{}) map[string]int
 		if isObjectId {
 			objectId, err := primitive.ObjectIDFromHex(value)
 			if err != nil {
-				return nil
+				return nil, err
 			}
 			switch field.Kind() {
 			case reflect.Ptr:
@@ -197,5 +201,5 @@ func UnmarshalPathParams(params map[string]string, v interface{}) map[string]int
 		}
 	}
 
-	return res
+	return res, nil
 }
