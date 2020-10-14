@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 
 	"github.com/ez-connect/go-rest/core"
@@ -174,7 +175,7 @@ func UnmarshalPathParams(params map[string]string, v interface{}) (map[string]in
 				key = bsonInfo[0]
 			}
 		}
-
+		// fmt.Println(fieldName)
 		value, err := getValue(field.Type(), value)
 		if err != nil {
 			return nil, err
@@ -185,26 +186,59 @@ func UnmarshalPathParams(params map[string]string, v interface{}) (map[string]in
 	return res, nil
 }
 
-func getValue(fieldType reflect.Type, value interface{}) (interface{}, error) {
-	// fieldType := field.Type()
-	objectId, err := primitive.ObjectIDFromHex(value.(string))
+func getValue(fieldType reflect.Type, value string) (interface{}, error) {
+	if fieldType == objectIdType {
+		objectId, err := primitive.ObjectIDFromHex(value)
+		if err != nil {
+			return nil, err
+		}
+		return objectId, nil
+	}
+	// fmt.Println(fieldType)
 	switch fieldType.Kind() {
 	case reflect.Ptr:
-		if fieldType.Elem() == objectIdType {
-			if err != nil {
-				return nil, err
-			}
-			return &objectId, nil
-		}
-	case reflect.Struct:
-		if fieldType == objectIdType {
-			if err != nil {
-				return nil, err
-			}
-			return objectId, nil
-		}
+		v, err := getValue(fieldType.Elem(), value)
+		return &v, err
+	// case reflect.Struct:
+	// 	if fieldType == objectIdType {
+	// 		if err != nil {
+	// 			return nil, err
+	// 		}
+	// 		return objectId, nil
+	// 	}
 	case reflect.Slice:
 		return getValue(fieldType.Elem(), value)
+	case reflect.Float32:
+		v, err := strconv.ParseFloat(value, 32)
+		if err != nil {
+			return nil, err
+		}
+		return v, nil
+	case reflect.Float64:
+		v, err := strconv.ParseFloat(value, 64)
+		if err != nil {
+			return nil, err
+		}
+		return v, nil
+	case reflect.Int32:
+		v, err := strconv.ParseInt(value, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		return v, nil
+	case reflect.Int64:
+		v, err := strconv.ParseInt(value, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		return v, nil
+	case reflect.Bool:
+		v, err := strconv.ParseBool(value)
+		if err != nil {
+			return nil, err
+		}
+		return v, nil
 	}
+
 	return value, nil
 }
