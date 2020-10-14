@@ -32,7 +32,7 @@ func validateMap(v map[string]interface{}, rv reflect.Value, mustBeObjectId bool
 		fieldName := strings.Title(key)
 		field := rv.FieldByName(fieldName)
 		if !field.IsValid() && core.IndexOf(keywords, key) < 0 {
-			return nil, errors.New(fmt.Sprintf("Fields/keyword %s is not exist", key))
+			return nil, fmt.Errorf("Fields/keyword %s is not exist", key)
 		}
 
 		isObjectId := false
@@ -83,7 +83,7 @@ func validateMap(v map[string]interface{}, rv reflect.Value, mustBeObjectId bool
 			}
 		default:
 			if isObjectId || mustBeObjectId {
-				return nil, errors.New(fmt.Sprintf("Field %s must be objectid string", key))
+				return nil, fmt.Errorf("Field %s must be objectid string", key)
 			} else {
 				result[key] = value
 			}
@@ -163,7 +163,7 @@ func UnmarshalPathParams(params map[string]string, v interface{}) (map[string]in
 		fieldName := strings.Title(key)
 		field := rv.FieldByName(fieldName)
 		if !field.IsValid() {
-			return nil, errors.New(fmt.Sprintf("Field %s is not exist", key))
+			return nil, fmt.Errorf("Field %s is not exist", key)
 		}
 
 		// get name of field from bson
@@ -175,31 +175,36 @@ func UnmarshalPathParams(params map[string]string, v interface{}) (map[string]in
 			}
 		}
 
-		isObjectId := false
-
-		// check field is objectId
-		switch field.Kind() {
-		case reflect.Ptr:
-			isObjectId = field.Type().Elem() == objectIdType
-		case reflect.Struct:
-			isObjectId = field.Type() == objectIdType
+		value, err := getValue(field.Type(), value)
+		if err != nil {
+			return nil, err
 		}
-
-		if isObjectId {
-			objectId, err := primitive.ObjectIDFromHex(value)
-			if err != nil {
-				return nil, err
-			}
-			switch field.Kind() {
-			case reflect.Ptr:
-				res[key] = &objectId
-			case reflect.Struct:
-				res[key] = objectId
-			}
-		} else {
-			res[key] = value
-		}
+		res[key] = value
 	}
 
 	return res, nil
+}
+
+func getValue(fieldType reflect.Type, value interface{}) (interface{}, error) {
+	// fieldType := field.Type()
+	objectId, err := primitive.ObjectIDFromHex(value.(string))
+	switch fieldType.Kind() {
+	case reflect.Ptr:
+		if fieldType.Elem() == objectIdType {
+			if err != nil {
+				return nil, err
+			}
+			return &objectId, nil
+		}
+	case reflect.Struct:
+		if fieldType == objectIdType {
+			if err != nil {
+				return nil, err
+			}
+			return objectId, nil
+		}
+	case reflect.Slice:
+		return getValue(fieldType.Elem(), value)
+	}
+	return value, nil
 }
