@@ -35,6 +35,7 @@ type CompoundIndex struct {
 }
 
 type Index struct {
+	Name   string   `yaml:"name,omitempty"`
 	Fields []string `yaml:"fields"`
 	Text   bool     `yaml:"text,omitempty"` // text index
 	Unique bool     `yaml:"unique,omitempty"`
