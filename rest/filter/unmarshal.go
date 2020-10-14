@@ -195,9 +195,11 @@ func getValue(fieldType reflect.Type, value string) (interface{}, error) {
 		return objectId, nil
 	}
 	// fmt.Println(fieldType)
+	var v interface{}
+	var err error
 	switch fieldType.Kind() {
 	case reflect.Ptr:
-		v, err := getValue(fieldType.Elem(), value)
+		v, err = getValue(fieldType.Elem(), value)
 		return &v, err
 	// case reflect.Struct:
 	// 	if fieldType == objectIdType {
@@ -209,36 +211,21 @@ func getValue(fieldType reflect.Type, value string) (interface{}, error) {
 	case reflect.Slice:
 		return getValue(fieldType.Elem(), value)
 	case reflect.Float32:
-		v, err := strconv.ParseFloat(value, 32)
-		if err != nil {
-			return nil, err
-		}
-		return v, nil
+		v, err = strconv.ParseFloat(value, 32)
 	case reflect.Float64:
-		v, err := strconv.ParseFloat(value, 64)
-		if err != nil {
-			return nil, err
-		}
-		return v, nil
+		v, err = strconv.ParseFloat(value, 64)
 	case reflect.Int32:
-		v, err := strconv.ParseInt(value, 10, 32)
-		if err != nil {
-			return nil, err
-		}
-		return v, nil
+		v, err = strconv.ParseInt(value, 10, 32)
 	case reflect.Int64:
-		v, err := strconv.ParseInt(value, 10, 64)
-		if err != nil {
-			return nil, err
-		}
-		return v, nil
+		v, err = strconv.ParseInt(value, 10, 64)
 	case reflect.Bool:
-		v, err := strconv.ParseBool(value)
-		if err != nil {
-			return nil, err
-		}
-		return v, nil
+		v, err = strconv.ParseBool(value)
+	default:
+		v = value
 	}
 
-	return value, nil
+	if err != nil {
+		return nil, err
+	}
+	return v, nil
 }
