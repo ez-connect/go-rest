@@ -33,7 +33,13 @@ func GenerateRepository(packageName string, config Config) string {
 	buf = append(buf, "\tr.Driver.EnsureIndex(CollectionName, \"updatedAt\", bson.M{\"updatedAt\": -1}, false)")
 
 	for _, v := range config.Indexes {
-		name := strings.Join(v.Fields, ".")
+		var name string
+		if v.Name != "" {
+			name = v.Name
+		} else {
+			name = strings.Join(v.Fields, ".")
+		}
+
 		fields := []string{}
 		for _, f := range v.Fields {
 			if v.Text {
