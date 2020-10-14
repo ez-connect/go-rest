@@ -53,13 +53,13 @@ func (h *HandlerBase) Find(c echo.Context,
 		}
 	}
 
-	if err == nil {
-		total, _ := h.db.Count(h.collection, filter)
-		c.Response().Header().Set(HeaderTotalCount, strconv.Itoa(int(total)))
-		return c.JSON(http.StatusOK, docs)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusServiceUnavailable, err.Error())
 	}
 
-	return echo.NewHTTPError(http.StatusServiceUnavailable, err.Error())
+	total, _ := h.db.Count(h.collection, filter)
+	c.Response().Header().Set(HeaderTotalCount, strconv.Itoa(int(total)))
+	return c.JSON(http.StatusOK, docs)
 }
 
 func (h *HandlerBase) FindOne(c echo.Context,
