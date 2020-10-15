@@ -19,6 +19,7 @@ var (
 		"$and",
 		"$or",
 		"$eq",
+		"$ne",
 		"$gt",
 		"$lt",
 		"$in",
@@ -44,6 +45,14 @@ func validateMap(v map[string]interface{}, rv reflect.Value, mustBeObjectId bool
 				isObjectId = field.Type().Elem() == objectIdType
 			case reflect.Struct:
 				isObjectId = field.Type() == objectIdType
+			case reflect.Slice:
+				fieldType := field.Type().Elem()
+				switch fieldType.Kind() {
+				case reflect.Ptr:
+					isObjectId = fieldType.Elem() == objectIdType
+				case reflect.Struct:
+					isObjectId = fieldType == objectIdType
+				}
 			}
 
 			// get name of field from bson
@@ -76,7 +85,7 @@ func validateMap(v map[string]interface{}, rv reflect.Value, mustBeObjectId bool
 				switch field.Kind() {
 				case reflect.Ptr:
 					result[key] = &objectId
-				case reflect.Struct:
+				default:
 					result[key] = objectId
 				}
 			} else {
