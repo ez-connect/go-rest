@@ -28,40 +28,72 @@ var (
 	objectIdType = reflect.TypeOf(primitive.NewObjectID())
 )
 
+func getField(rv reflect.Value, key string) (bool, string, bool) {
+	keys := strings.Split(key, ".")
+	field := reflect.Value{}
+	fieldType := rv.Type()
+	newKey := []string{}
+	for i, k := range keys {
+		fieldName := strings.Title(k)
+		field = rv.FieldByName(fieldName)
+		if !field.IsValid() {
+			return false, key, false
+		}
+		fieldType = field.Type()
+		switch field.Kind() {
+		case reflect.Ptr:
+			if fieldType.Elem() == objectIdType && i < len(keys)-1 {
+				return false, key, false
+			}
+			fieldType = fieldType.Elem()
+		case reflect.Struct:
+			if fieldType == objectIdType && i < len(keys)-1 {
+				return false, key, false
+			}
+		case reflect.Slice:
+			fieldType = fieldType.Elem()
+			switch fieldType.Kind() {
+			case reflect.Ptr:
+				if fieldType.Elem() == objectIdType && i < len(keys)-1 {
+					return false, key, false
+				}
+				fieldType = fieldType.Elem()
+			case reflect.Struct:
+				if fieldType == objectIdType && i < len(keys)-1 {
+					return false, key, false
+				}
+			}
+		}
+
+		// get name of field from bson
+		st, found := rv.Type().FieldByName(fieldName)
+		if found {
+			bsonInfo := strings.Split(st.Tag.Get("bson"), ",")
+			if len(bsonInfo) > 0 && bsonInfo[0] != "" {
+				newKey = append(newKey, bsonInfo[0])
+			}
+		}
+
+		// update rv
+		if i < len(keys)-1 {
+			rv = reflect.New(fieldType).Elem()
+		}
+	}
+	if field.IsValid() {
+		return field.IsValid(), strings.Join(newKey, "."), fieldType == objectIdType
+	}
+	return field.IsValid(), key, fieldType == objectIdType
+}
+
 func validateMap(v map[string]interface{}, rv reflect.Value, mustBeObjectId bool) (bson.M, error) {
 	result := bson.M{}
 	for key, value := range v {
-		fieldName := strings.Title(key)
-		field := rv.FieldByName(fieldName)
-		if !field.IsValid() && core.IndexOf(keywords, key) < 0 {
-			return nil, fmt.Errorf("Fields/keyword %s is not exist", key)
-		}
-
 		isObjectId := false
-		if field.IsValid() {
-			// check field is objectId
-			switch field.Kind() {
-			case reflect.Ptr:
-				isObjectId = field.Type().Elem() == objectIdType
-			case reflect.Struct:
-				isObjectId = field.Type() == objectIdType
-			case reflect.Slice:
-				fieldType := field.Type().Elem()
-				switch fieldType.Kind() {
-				case reflect.Ptr:
-					isObjectId = fieldType.Elem() == objectIdType
-				case reflect.Struct:
-					isObjectId = fieldType == objectIdType
-				}
-			}
-
-			// get name of field from bson
-			st, found := rv.Type().FieldByName(fieldName)
-			if found {
-				bsonInfo := strings.Split(st.Tag.Get("bson"), ",")
-				if len(bsonInfo) > 0 && bsonInfo[0] != "" {
-					key = bsonInfo[0]
-				}
+		if core.IndexOf(keywords, key) < 0 {
+			isValid := false
+			isValid, key, isObjectId = getField(rv, key)
+			if !isValid {
+				return nil, fmt.Errorf("Fields/keyword %s is not exist", key)
 			}
 		}
 
@@ -82,12 +114,7 @@ func validateMap(v map[string]interface{}, rv reflect.Value, mustBeObjectId bool
 				if err != nil {
 					return nil, err
 				}
-				switch field.Kind() {
-				case reflect.Ptr:
-					result[key] = &objectId
-				default:
-					result[key] = objectId
-				}
+				result[key] = objectId
 			} else {
 				result[key] = value
 			}
@@ -208,8 +235,7 @@ func getValue(fieldType reflect.Type, value string) (interface{}, error) {
 	var err error
 	switch fieldType.Kind() {
 	case reflect.Ptr:
-		v, err = getValue(fieldType.Elem(), value)
-		return &v, err
+		return getValue(fieldType.Elem(), value)
 	// case reflect.Struct:
 	// 	if fieldType == objectIdType {
 	// 		if err != nil {
