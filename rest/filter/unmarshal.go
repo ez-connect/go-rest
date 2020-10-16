@@ -28,7 +28,7 @@ var (
 	objectIdType = reflect.TypeOf(primitive.NewObjectID())
 )
 
-func getField(rv reflect.Value, key string) (bool, string, bool) {
+func getField(rv reflect.Value, key string) (bool, string, reflect.Type) {
 	keys := strings.Split(key, ".")
 	field := reflect.Value{}
 	fieldType := rv.Type()
@@ -37,30 +37,30 @@ func getField(rv reflect.Value, key string) (bool, string, bool) {
 		fieldName := strings.Title(k)
 		field = rv.FieldByName(fieldName)
 		if !field.IsValid() {
-			return false, key, false
+			return false, key, nil
 		}
 		fieldType = field.Type()
 		switch field.Kind() {
 		case reflect.Ptr:
 			if fieldType.Elem() == objectIdType && i < len(keys)-1 {
-				return false, key, false
+				return false, key, nil
 			}
 			fieldType = fieldType.Elem()
 		case reflect.Struct:
 			if fieldType == objectIdType && i < len(keys)-1 {
-				return false, key, false
+				return false, key, nil
 			}
 		case reflect.Slice:
 			fieldType = fieldType.Elem()
 			switch fieldType.Kind() {
 			case reflect.Ptr:
 				if fieldType.Elem() == objectIdType && i < len(keys)-1 {
-					return false, key, false
+					return false, key, nil
 				}
 				fieldType = fieldType.Elem()
 			case reflect.Struct:
 				if fieldType == objectIdType && i < len(keys)-1 {
-					return false, key, false
+					return false, key, nil
 				}
 			}
 		}
@@ -71,18 +71,23 @@ func getField(rv reflect.Value, key string) (bool, string, bool) {
 			bsonInfo := strings.Split(st.Tag.Get("bson"), ",")
 			if len(bsonInfo) > 0 && bsonInfo[0] != "" {
 				newKey = append(newKey, bsonInfo[0])
+			} else {
+				newKey = append(newKey, fieldName)
 			}
 		}
 
 		// update rv
 		if i < len(keys)-1 {
 			rv = reflect.New(fieldType).Elem()
+			if rv.Kind() != reflect.Struct {
+				return false, key, nil
+			}
 		}
 	}
 	if field.IsValid() {
-		return field.IsValid(), strings.Join(newKey, "."), fieldType == objectIdType
+		return field.IsValid(), strings.Join(newKey, "."), fieldType
 	}
-	return field.IsValid(), key, fieldType == objectIdType
+	return field.IsValid(), key, fieldType
 }
 
 func validateMap(v map[string]interface{}, rv reflect.Value, mustBeObjectId bool) (bson.M, error) {
@@ -91,10 +96,12 @@ func validateMap(v map[string]interface{}, rv reflect.Value, mustBeObjectId bool
 		isObjectId := false
 		if core.IndexOf(keywords, key) < 0 {
 			isValid := false
-			isValid, key, isObjectId = getField(rv, key)
+			var fieldType reflect.Type
+			isValid, key, fieldType = getField(rv, key)
 			if !isValid {
 				return nil, fmt.Errorf("Fields/keyword %s is not exist", key)
 			}
+			isObjectId = fieldType == objectIdType
 		}
 
 		var err error
@@ -197,22 +204,15 @@ func UnmarshalPathParams(params map[string]string, v interface{}) (map[string]in
 
 	res := bson.M{}
 	for key, value := range params {
-		fieldName := strings.Title(key)
-		field := rv.FieldByName(fieldName)
-		if !field.IsValid() {
-			return nil, fmt.Errorf("Field %s is not exist", key)
+		isValid := false
+		var fieldType reflect.Type
+		isValid, key, fieldType = getField(rv, key)
+		if !isValid {
+			return nil, fmt.Errorf("Fields/keyword %s is not exist", key)
 		}
 
-		// get name of field from bson
-		st, found := rv.Type().FieldByName(fieldName)
-		if found {
-			bsonInfo := strings.Split(st.Tag.Get("bson"), ",")
-			if len(bsonInfo) > 0 && bsonInfo[0] != "" {
-				key = bsonInfo[0]
-			}
-		}
-		// fmt.Println(fieldName)
-		value, err := getValue(field.Type(), value)
+		// fmt.Println(fieldType)
+		value, err := getValue(fieldType, value)
 		if err != nil {
 			return nil, err
 		}
@@ -249,10 +249,14 @@ func getValue(fieldType reflect.Type, value string) (interface{}, error) {
 		v, err = strconv.ParseFloat(value, 32)
 	case reflect.Float64:
 		v, err = strconv.ParseFloat(value, 64)
-	case reflect.Int32:
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32:
 		v, err = strconv.ParseInt(value, 10, 32)
 	case reflect.Int64:
 		v, err = strconv.ParseInt(value, 10, 64)
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32:
+		v, err = strconv.ParseUint(value, 10, 32)
+	case reflect.Uint64:
+		v, err = strconv.ParseUint(value, 10, 64)
 	case reflect.Bool:
 		v, err = strconv.ParseBool(value)
 	default:
