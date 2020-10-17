@@ -9,24 +9,48 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ez-connect/go-rest/core"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+type ValueType int
+
+const (
+	Value ValueType = iota
+	Array
+	Map
+	Bool
+	Regex
+	String
+	Any
+)
+
 var (
-	keywords = []string{
-		"$and",
-		"$or",
-		"$eq",
-		"$ne",
-		"$gt",
-		"$lt",
-		"$in",
+	keywords = map[string][]ValueType{
+		// keywork: {ValueType, (Array)Element ValueType}
+		"$and": {Array, Map},
+		"$or":  {Array, Map},
+		"$not": {Map},
+		"$nor": {Array, Map},
+
+		"$eq":  {Value},
+		"$ne":  {Value},
+		"$gt":  {Value},
+		"$gte": {Value},
+		"$lt":  {Value},
+		"$lte": {Value},
+		"$in":  {Array, Value},
+		"$nin": {Array, Value},
+
+		"$exist": {Value}, // Bool
 	}
 
 	objectIdType = reflect.TypeOf(primitive.NewObjectID())
 )
+
+func (me ValueType) String() string {
+	return [...]string{"Value", "Array", "Map", "Bool", "Regex", "String", "Any"}[me]
+}
 
 func getField(rv reflect.Value, key string) (bool, string, reflect.Type) {
 	keys := strings.Split(key, ".")
@@ -93,41 +117,56 @@ func getField(rv reflect.Value, key string) (bool, string, reflect.Type) {
 func validateMap(v map[string]interface{}, rv reflect.Value, mustBeObjectId bool) (bson.M, error) {
 	result := bson.M{}
 	for key, value := range v {
-		isObjectId := false
-		if core.IndexOf(keywords, key) < 0 {
+		isObjectId := mustBeObjectId
+		valueType := Any
+		if keywords[key] == nil {
 			isValid := false
 			var fieldType reflect.Type
 			isValid, key, fieldType = getField(rv, key)
 			if !isValid {
-				return nil, fmt.Errorf("Fields/keyword %s is not exist", key)
+				return nil, fmt.Errorf("\"%s\" is not exist", key)
 			}
-			isObjectId = fieldType == objectIdType
+			isObjectId = (isObjectId || (fieldType == objectIdType))
+		} else {
+			valueType = keywords[key][0]
 		}
 
 		var err error
 		switch value := value.(type) {
 		case map[string]interface{}:
-			result[key], err = validateMap(value, rv, isObjectId || mustBeObjectId)
+			if valueType != Map && valueType != Any {
+				return nil, fmt.Errorf("Value of \"%s\" is must be %s", key, valueType.String())
+			}
+			result[key], err = validateMap(value, rv, isObjectId)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("\"%s\": %s", key, err.Error())
 			}
 		case []interface{}:
-			if result[key], err = validateArray(value, rv, isObjectId || mustBeObjectId); err != nil {
-				return nil, err
+			if valueType != Array && valueType != Any {
+				return nil, fmt.Errorf("Value of \"%s\" is must be %s", key, valueType.String())
+			}
+			if result[key], err = validateArray(value, rv, isObjectId, keywords[key][1]); err != nil {
+				return nil, fmt.Errorf("\"%s\": %s", key, err.Error())
 			}
 		case string:
-			if isObjectId || mustBeObjectId {
+			if valueType != Value && valueType != Any {
+				return nil, fmt.Errorf("Value of \"%s\" is must be %s", key, valueType.String())
+			}
+			if isObjectId {
 				objectId, err := primitive.ObjectIDFromHex(value)
 				if err != nil {
-					return nil, err
+					return nil, fmt.Errorf("\"%s\": %s", key, err.Error())
 				}
 				result[key] = objectId
 			} else {
 				result[key] = value
 			}
 		default:
-			if isObjectId || mustBeObjectId {
-				return nil, fmt.Errorf("Field %s must be objectid string", key)
+			if valueType != Value && valueType != Any {
+				return nil, fmt.Errorf("Value of \"%s\" is must be %s", key, valueType.String())
+			}
+			if isObjectId {
+				return nil, fmt.Errorf("\"%s\" must be objectid string", key)
 			} else {
 				result[key] = value
 			}
@@ -137,23 +176,32 @@ func validateMap(v map[string]interface{}, rv reflect.Value, mustBeObjectId bool
 	return result, nil
 }
 
-func validateArray(v []interface{}, rv reflect.Value, mustBeObjectId bool) ([]interface{}, error) {
+func validateArray(v []interface{}, rv reflect.Value, mustBeObjectId bool, elementType ValueType) ([]interface{}, error) {
 	result := make([]interface{}, 0)
 	for value := range v {
 		switch x := v[value].(type) {
 		case map[string]interface{}:
+			if elementType != Map && elementType != Any {
+				return nil, fmt.Errorf("element of array must be %s", elementType.String())
+			}
 			t, err := validateMap(x, rv, mustBeObjectId)
 			if err != nil {
 				return nil, err
 			}
 			result = append(result, t)
 		case []interface{}:
-			t, err := validateArray(x, rv, mustBeObjectId)
+			if elementType != Array && elementType != Any {
+				return nil, fmt.Errorf("element of array must be %s", elementType.String())
+			}
+			t, err := validateArray(x, rv, mustBeObjectId, Any)
 			if err != nil {
 				return nil, err
 			}
 			result = append(result, t)
 		case string:
+			if elementType != Value && elementType != Any {
+				return nil, fmt.Errorf("element of array must be %s", elementType.String())
+			}
 			if mustBeObjectId {
 				objectId, err := primitive.ObjectIDFromHex(x)
 				if err != nil {
@@ -164,6 +212,9 @@ func validateArray(v []interface{}, rv reflect.Value, mustBeObjectId bool) ([]in
 				result = append(result, x)
 			}
 		default:
+			if elementType != Value && elementType != Any {
+				return nil, fmt.Errorf("element of array must be %s", elementType.String())
+			}
 			if !mustBeObjectId {
 				result = append(result, x)
 			} else {
