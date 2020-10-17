@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -42,7 +43,13 @@ var (
 		"$in":  {Array, Value},
 		"$nin": {Array, Value},
 
-		"$exist": {Value}, // Bool
+		"$exists": {Bool},
+
+		"$all":       {Array, Value},
+		"$elemMatch": {Map},
+
+		"$text":  {Map},
+		"$regex": {String},
 	}
 
 	objectIdType = reflect.TypeOf(primitive.NewObjectID())
@@ -90,8 +97,7 @@ func getField(rv reflect.Value, key string) (bool, string, reflect.Type) {
 		}
 
 		// get name of field from bson
-		st, found := rv.Type().FieldByName(fieldName)
-		if found {
+		if st, found := rv.Type().FieldByName(fieldName); found {
 			bsonInfo := strings.Split(st.Tag.Get("bson"), ",")
 			if len(bsonInfo) > 0 && bsonInfo[0] != "" {
 				newKey = append(newKey, bsonInfo[0])
@@ -102,8 +108,7 @@ func getField(rv reflect.Value, key string) (bool, string, reflect.Type) {
 
 		// update rv
 		if i < len(keys)-1 {
-			rv = reflect.New(fieldType).Elem()
-			if rv.Kind() != reflect.Struct {
+			if rv = reflect.New(fieldType).Elem(); rv.Kind() != reflect.Struct {
 				return false, key, nil
 			}
 		}
@@ -122,8 +127,7 @@ func validateMap(v map[string]interface{}, rv reflect.Value, mustBeObjectId bool
 		if keywords[key] == nil {
 			isValid := false
 			var fieldType reflect.Type
-			isValid, key, fieldType = getField(rv, key)
-			if !isValid {
+			if isValid, key, fieldType = getField(rv, key); !isValid {
 				return nil, fmt.Errorf("\"%s\" is not exist", key)
 			}
 			isObjectId = (isObjectId || (fieldType == objectIdType))
@@ -137,8 +141,11 @@ func validateMap(v map[string]interface{}, rv reflect.Value, mustBeObjectId bool
 			if valueType != Map && valueType != Any {
 				return nil, fmt.Errorf("Value of \"%s\" is must be %s", key, valueType.String())
 			}
-			result[key], err = validateMap(value, rv, isObjectId)
-			if err != nil {
+			if key == "$text" { // special case
+				if result[key], err = ValidateText(value); err != nil {
+					return nil, fmt.Errorf("\"%s\": %s", key, err.Error())
+				}
+			} else if result[key], err = validateMap(value, rv, isObjectId); err != nil {
 				return nil, fmt.Errorf("\"%s\": %s", key, err.Error())
 			}
 		case []interface{}:
@@ -149,18 +156,27 @@ func validateMap(v map[string]interface{}, rv reflect.Value, mustBeObjectId bool
 				return nil, fmt.Errorf("\"%s\": %s", key, err.Error())
 			}
 		case string:
-			if valueType != Value && valueType != Any {
+			if valueType != String && valueType != Value && valueType != Any {
 				return nil, fmt.Errorf("Value of \"%s\" is must be %s", key, valueType.String())
 			}
 			if isObjectId {
-				objectId, err := primitive.ObjectIDFromHex(value)
-				if err != nil {
+				if result[key], err = primitive.ObjectIDFromHex(value); err != nil {
 					return nil, fmt.Errorf("\"%s\": %s", key, err.Error())
 				}
-				result[key] = objectId
 			} else {
-				result[key] = value
+				if key == "$regex" { // special case
+					if result[key], err = ValidateRegex(value); err != nil {
+						return nil, fmt.Errorf("\"%s\": %s", key, err.Error())
+					}
+				} else {
+					result[key] = value
+				}
 			}
+		case bool: // only $exists use
+			if valueType != Bool && valueType != Any {
+				return nil, fmt.Errorf("Value of \"%s\" is must be %s", key, valueType.String())
+			}
+			result[key] = value
 		default:
 			if valueType != Value && valueType != Any {
 				return nil, fmt.Errorf("Value of \"%s\" is must be %s", key, valueType.String())
@@ -178,14 +194,15 @@ func validateMap(v map[string]interface{}, rv reflect.Value, mustBeObjectId bool
 
 func validateArray(v []interface{}, rv reflect.Value, mustBeObjectId bool, elementType ValueType) ([]interface{}, error) {
 	result := make([]interface{}, 0)
+	var t interface{}
+	var err error
 	for value := range v {
 		switch x := v[value].(type) {
 		case map[string]interface{}:
 			if elementType != Map && elementType != Any {
 				return nil, fmt.Errorf("element of array must be %s", elementType.String())
 			}
-			t, err := validateMap(x, rv, mustBeObjectId)
-			if err != nil {
+			if t, err = validateMap(x, rv, mustBeObjectId); err != nil {
 				return nil, err
 			}
 			result = append(result, t)
@@ -193,8 +210,7 @@ func validateArray(v []interface{}, rv reflect.Value, mustBeObjectId bool, eleme
 			if elementType != Array && elementType != Any {
 				return nil, fmt.Errorf("element of array must be %s", elementType.String())
 			}
-			t, err := validateArray(x, rv, mustBeObjectId, Any)
-			if err != nil {
+			if t, err = validateArray(x, rv, mustBeObjectId, Any); err != nil {
 				return nil, err
 			}
 			result = append(result, t)
@@ -203,11 +219,10 @@ func validateArray(v []interface{}, rv reflect.Value, mustBeObjectId bool, eleme
 				return nil, fmt.Errorf("element of array must be %s", elementType.String())
 			}
 			if mustBeObjectId {
-				objectId, err := primitive.ObjectIDFromHex(x)
-				if err != nil {
+				if t, err = primitive.ObjectIDFromHex(x); err != nil {
 					return nil, err
 				}
-				result = append(result, objectId)
+				result = append(result, t)
 			} else {
 				result = append(result, x)
 			}
@@ -223,6 +238,32 @@ func validateArray(v []interface{}, rv reflect.Value, mustBeObjectId bool, eleme
 		}
 	}
 	return result, nil
+}
+
+func ValidateText(v map[string]interface{}) (map[string]interface{}, error) {
+	for key, value := range v {
+		switch key {
+		case "$search", "$language":
+			if reflect.TypeOf(value).Kind() != reflect.String {
+				return nil, fmt.Errorf("\"%s\" must be string", key)
+			}
+		case "$caseSensitive", "$diacriticSensitive":
+			if reflect.TypeOf(value).Kind() != reflect.Bool {
+				return nil, fmt.Errorf("\"%s\" must be bool", key)
+			}
+		default:
+			return nil, fmt.Errorf("\"%s\" is not exist", key)
+		}
+	}
+	return v, nil
+}
+
+func ValidateRegex(v string) (*primitive.Regex, error) {
+	r, _ := regexp.Compile("^/(.+)/(.*)$")
+	if match := r.FindStringSubmatch(v); len(match) == 3 {
+		return &primitive.Regex{Pattern: match[1], Options: match[2]}, nil
+	}
+	return nil, fmt.Errorf("must be regex")
 }
 
 func UnmarshalQueryParam(query string, v interface{}) (map[string]interface{}, error) {
@@ -285,16 +326,7 @@ func getValue(fieldType reflect.Type, value string) (interface{}, error) {
 	var v interface{}
 	var err error
 	switch fieldType.Kind() {
-	case reflect.Ptr:
-		return getValue(fieldType.Elem(), value)
-	// case reflect.Struct:
-	// 	if fieldType == objectIdType {
-	// 		if err != nil {
-	// 			return nil, err
-	// 		}
-	// 		return objectId, nil
-	// 	}
-	case reflect.Slice:
+	case reflect.Ptr, reflect.Slice:
 		return getValue(fieldType.Elem(), value)
 	case reflect.Float32:
 		v, err = strconv.ParseFloat(value, 32)
