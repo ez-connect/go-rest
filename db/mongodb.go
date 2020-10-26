@@ -195,8 +195,10 @@ func (db *MongoDb) AggregateOne(collection string, pipeline interface{},
 	return nil
 }
 
-func (db *MongoDb) Insert(collection string, doc interface{}) (interface{}, error) {
-	return db.getCollection(collection).InsertOne(context.TODO(), doc)
+func (db *MongoDb) Insert(collection string, doc interface{}) (InsertOneResult, error) {
+	mres, err := db.getCollection(collection).InsertOne(context.TODO(), doc)
+	res := InsertOneResult{Id: mres.InsertedID}
+	return res, err
 }
 
 func (db *MongoDb) InsertMany(collection string, docs []interface{}) ([]interface{}, error) {

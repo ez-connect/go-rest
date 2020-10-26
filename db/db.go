@@ -31,7 +31,7 @@ type DatabaseBase interface {
 
 	// Insert executes an insert command to insert a single document into the collection.
 	// The _id can be retrieved from the result.
-	Insert(collection string, doc interface{}) (interface{}, error)
+	Insert(collection string, doc interface{}) (InsertOneResult, error)
 	InsertMany(collection string, docs []interface{}) ([]interface{}, error)
 	UpdateOne(collection string, filter interface{},
 		doc interface{}) (interface{}, error)
@@ -44,4 +44,8 @@ type DatabaseBase interface {
 
 	EnsureIndex(collection string, name string, keys bson.M,
 		unique bool) string
+}
+
+type InsertOneResult struct {
+	Id interface{} `json:"id"`
 }
