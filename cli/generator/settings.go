@@ -11,7 +11,7 @@ import (
 func GenerateSettings(packageName string) string {
 	doc := Config{
 		Model: ModelConfig{
-			Name: packageName,
+			Name: fmt.Sprintf("%ss", packageName),
 			Attributes: []Attribute{
 				{Name: "name", Type: "string"},
 				{Name: "price", Type: "float32"},
