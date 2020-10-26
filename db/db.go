@@ -34,7 +34,7 @@ type DatabaseBase interface {
 	Insert(collection string, doc interface{}) (InsertOneResult, error)
 	InsertMany(collection string, docs []interface{}) ([]interface{}, error)
 	UpdateOne(collection string, filter interface{},
-		doc interface{}) (interface{}, error)
+		doc interface{}) (UpdateOneResult, error)
 	UpdateMany(collection string, filter interface{},
 		doc interface{}) (interface{}, error)
 
@@ -47,5 +47,9 @@ type DatabaseBase interface {
 }
 
 type InsertOneResult struct {
+	Id interface{} `json:"id"`
+}
+
+type UpdateOneResult struct {
 	Id interface{} `json:"id"`
 }
