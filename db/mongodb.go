@@ -9,6 +9,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -207,8 +208,15 @@ func (db *MongoDb) InsertMany(collection string, docs []interface{}) ([]interfac
 }
 
 func (db *MongoDb) UpdateOne(collection string, filter interface{},
-	update interface{}) (interface{}, error) {
-	return db.getCollection(collection).UpdateOne(context.TODO(), filter, update)
+	update interface{}) (UpdateOneResult, error) {
+	_, err := db.getCollection(collection).UpdateOne(context.TODO(), filter, update)
+	var id interface{}
+	f, ok := filter.(primitive.M)
+	if ok {
+		id = f["_id"]
+	}
+	res := UpdateOneResult{Id: id}
+	return res, err
 }
 
 func (db *MongoDb) UpdateMany(collection string, filter interface{},
