@@ -221,10 +221,11 @@ func (db *MongoDb) UpdateOne(collection string, filter interface{},
 
 func (db *MongoDb) FindOneAndUpdate(collection string, filter interface{},
 	update, doc interface{}) error {
+	opt := options.After
 	res := db.getCollection(collection).FindOneAndUpdate(context.TODO(), filter, update,
-		&options.FindOneAndUpdateOptions{},
+		&options.FindOneAndUpdateOptions{ReturnDocument: &opt},
 	)
-	return res.Decode(&doc)
+	return res.Decode(doc)
 }
 
 func (db *MongoDb) UpdateMany(collection string, filter interface{},
