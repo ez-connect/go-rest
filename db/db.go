@@ -33,8 +33,8 @@ type DatabaseBase interface {
 	// The _id can be retrieved from the result.
 	Insert(collection string, doc interface{}) (InsertOneResult, error)
 	InsertMany(collection string, docs []interface{}) ([]interface{}, error)
-	UpdateOne(collection string, filter interface{},
-		doc interface{}) (UpdateOneResult, error)
+	UpdateOne(collection string, filter, doc interface{}) (UpdateOneResult, error)
+	FindOneAndUpdate(collection string, filter, update, doc interface{}) error
 	UpdateMany(collection string, filter interface{},
 		doc interface{}) (interface{}, error)
 

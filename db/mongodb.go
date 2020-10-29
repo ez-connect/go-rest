@@ -219,6 +219,14 @@ func (db *MongoDb) UpdateOne(collection string, filter interface{},
 	return res, err
 }
 
+func (db *MongoDb) FindOneAndUpdate(collection string, filter interface{},
+	update, doc interface{}) error {
+	res := db.getCollection(collection).FindOneAndUpdate(context.TODO(), filter, update,
+		&options.FindOneAndUpdateOptions{},
+	)
+	return res.Decode(&doc)
+}
+
 func (db *MongoDb) UpdateMany(collection string, filter interface{},
 	update interface{}) (interface{}, error) {
 	return db.getCollection(collection).UpdateMany(context.TODO(), filter, update)
