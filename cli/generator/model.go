@@ -30,10 +30,10 @@ func GenerateModel(packageName string, config Config) string {
 		"\tId *primitive.ObjectID `bson:\"_id,omitempty\" json:\"id,omitempty\"`",
 	)
 	for _, v := range config.Model.Attributes {
-		var omitempty = ""
-		if v.Omitempty {
-			omitempty = ",omitempty"
-		}
+		// var omitempty = ""
+		// if v.Omitempty {
+		// 	omitempty = ",omitempty"
+		// }
 
 		var validate = ""
 		if v.Required {
@@ -41,8 +41,8 @@ func GenerateModel(packageName string, config Config) string {
 		}
 
 		buf = append(buf, fmt.Sprintf(
-			"\t%s %s `bson:\"%s%s\" json:\"%s%s\"%s`",
-			strings.Title(v.Name), v.Type, v.Name, omitempty, v.Name, omitempty, validate),
+			"\t%s %s `bson:\"%s,omitempty\" json:\"%s,omitempty\"%s`",
+			strings.Title(v.Name), v.Type, v.Name, v.Name, validate),
 		)
 	}
 
