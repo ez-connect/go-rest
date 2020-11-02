@@ -7,7 +7,11 @@ import (
 )
 
 func TestGenerateOpenAPI(t *testing.T) {
-	v := GenerateOpenAPI("", []string{})
+	v := GenerateOpenAPIJSON("", []string{})
+	t.Error(v)
+	assert.NotEmpty(t, v)
+
+	v = GenerateOpenAPIYML("", []string{})
 	t.Error(v)
 	assert.NotEmpty(t, v)
 }
