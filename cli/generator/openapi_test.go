@@ -6,12 +6,46 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGenerateOpenAPI(t *testing.T) {
-	v := GenerateOpenAPIJSON("", []string{})
-	t.Error(v)
-	assert.NotEmpty(t, v)
+func TestGenerateOpenAP(t *testing.T) {
+	v := GenerateOpenAPI(Config{
+		Model: ModelConfig{
+			Name: "Model",
+			Attributes: []Attribute{
+				{
+					Name: "id",
+					Type: "*primitive.ObjectID",
+				},
+				{
+					Name: "name",
+					Type: "string",
+				},
+				{
+					Name: "createdAt",
+					Type: "*time.Time",
+				},
+			},
+		},
+		EmbedModels: []ModelConfig{
+			{
+				Name: "ImAModel",
+				Attributes: []Attribute{
+					{
+						Name: "id",
+						Type: "*primitive.ObjectID",
+					},
+					{
+						Name: "name",
+						Type: "string",
+					},
+					{
+						Name: "createdAt",
+						Type: "*time.Time",
+					},
+				},
+			},
+		},
+	}, _JSON)
 
-	v = GenerateOpenAPIYML("", []string{})
 	t.Error(v)
 	assert.NotEmpty(t, v)
 }

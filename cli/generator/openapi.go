@@ -39,7 +39,7 @@ type _ServerVariable struct {
 type _Server struct {
 	URL         string                     `json:"url" yaml:"url"`
 	Description string                     `json:"description" yaml:"description"`
-	Variables   map[string]_ServerVariable `json:"variables" yaml:"variables"`
+	Variables   map[string]_ServerVariable `json:"variables,omitempty" yaml:"variables,omitempty"`
 }
 
 type _ExternalDoc struct {
@@ -68,7 +68,7 @@ type _Schema struct {
 	_ReferenceObject
 
 	Type       string               `json:"type" yaml:"type"`
-	Required   []string             `json:"required" yaml:"required"`
+	Required   []string             `json:"required,omitempty" yaml:"required,omitempty"`
 	Properties map[string]_Property `json:"properties" yaml:"properties"`
 }
 
@@ -105,8 +105,8 @@ type _Path struct {
 	Get         _Operation `json:"get" yaml:"get"`
 }
 
-type _Component struct {
-	Schemas []_Schema `json:"schemas" yaml:"schemas"`
+type _Components struct {
+	Schemas map[string]_Schema `json:"schemas" yaml:"schemas"`
 }
 
 type _Security struct {
@@ -120,31 +120,96 @@ type _Definition struct {
 	Info         _Info            `json:"info" yaml:"info"`
 	Servers      []_Server        `json:"servers" yaml:"servers"`
 	Paths        map[string]_Path `json:"paths" yaml:"paths"`
-	Components   _Component       `json:"components" yaml:"components"`
+	Components   _Components      `json:"components" yaml:"components"`
 	Security     []_Security      `json:"security" yaml:"security"`
 	Tags         []_Tag           `json:"tags" yaml:"tags"`
 	ExternalDocs []_ExternalDoc   `json:"externalDocs" yaml:"externalDocs"`
 }
 
-var kDefaultAPI = _Definition{
+var definition = _Definition{
 	OpenAPI: "3.0.0",
 	Info: _Info{
-		Title: "a",
+		Title: "Example",
 	},
 	Servers: []_Server{
 		{URL: "https://example.com"},
 	},
-	Paths:        map[string]_Path{},
+	Paths: map[string]_Path{},
+	Components: _Components{
+		Schemas: map[string]_Schema{},
+	},
 	Security:     []_Security{},
+	Tags:         []_Tag{},
 	ExternalDocs: []_ExternalDoc{},
 }
 
-func GenerateOpenAPIJSON(packageName string, collections []string) string {
-	data, _ := json.Marshal(kDefaultAPI)
-	return string(data)
-}
+type _OpenAPIFormat string
 
-func GenerateOpenAPIYML(packageName string, collections []string) string {
-	data, _ := yaml.Marshal(kDefaultAPI)
-	return string(data)
+const (
+	_JSON _OpenAPIFormat = "json"
+	_YML  _OpenAPIFormat = "yml"
+)
+
+func GenerateOpenAPI(config Config, format _OpenAPIFormat) string {
+	/// Schemas
+	schemas := map[string]_Schema{}
+	for _, v := range config.EmbedModels {
+		properties := map[string]_Property{}
+		// r := reflect.ValueOf(v.Attributes)
+		// t := r.Type()
+		// for i := 0; i < r.NumField(); i++ {
+		// 	properties[t.Field(i).Name] = _Property{
+		// 		Type: fmt.Sprintf("%v", r.Field(i).Interface()),
+		// 	}
+		// }
+
+		for _, attr := range v.Attributes {
+			properties[attr.Name] = _Property{
+				// Type: attr.Type,
+				Type: "string",
+			}
+		}
+
+		schemas[v.Name] = _Schema{
+			Type:       "object",
+			Properties: properties,
+		}
+	}
+
+	properties := map[string]_Property{}
+	for _, v := range config.Model.Attributes {
+		properties[v.Name] = _Property{
+			// Type: attr.Type,
+			Type: "string",
+		}
+	}
+	schemas[config.Model.Name] = _Schema{
+		Type:       "object",
+		Properties: properties,
+	}
+
+	definition.Components.Schemas = schemas
+
+	/// Routes
+	paths := map[string]_Path{}
+	// for _, g := range config.Routes {
+	// 	paths[g.Path] := _Path{
+	// 		Get: _Operation{
+	// 			Summary: v.,
+
+	// 		},
+	// 	}
+	// }
+
+	definition.Paths = paths
+
+	if format == _JSON {
+		data, _ := json.Marshal(definition)
+		return string(data)
+	} else if format == _YML {
+		data, _ := yaml.Marshal(definition)
+		return string(data)
+	} else {
+		return "Requires JSON/YML"
+	}
 }
