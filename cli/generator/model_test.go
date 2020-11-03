@@ -10,20 +10,23 @@ func TestGenerateModel(t *testing.T) {
 	v := GenerateModel(
 		"test",
 		Config{
-			Model: ModelConfig{
-				Name: "ImAModel",
-				Attributes: []Attribute{
-					{
-						Name: "id",
-						Type: "*primitive.ObjectID",
-					},
-					{
-						Name: "name",
-						Type: "string",
-					},
-					{
-						Name: "createdAt",
-						Type: "*time.Time",
+			Collection: "test",
+			Models: []ModelConfig{
+				{
+					Name: "ImAModel",
+					Attributes: []Attribute{
+						{
+							Name: "id",
+							Type: "*primitive.ObjectID",
+						},
+						{
+							Name: "name",
+							Type: "string",
+						},
+						{
+							Name: "createdAt",
+							Type: "*time.Time",
+						},
 					},
 				},
 			},

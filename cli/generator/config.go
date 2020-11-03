@@ -16,7 +16,7 @@ type Attribute struct {
 }
 
 type ModelConfig struct {
-	// Collection name for main model or name for embed model
+	// Default Model for the collection, using name for embed models
 	Name string `yaml:"name"`
 
 	// All attributes
@@ -56,10 +56,10 @@ type RouteConfig struct {
 }
 
 type Config struct {
-	Import      Import        `yaml:"import"`
-	Model       ModelConfig   `yaml:"model"`
-	EmbedModels []ModelConfig `yaml:"embedModels"`
-	Indexes     []Index       `yaml:"indexes"`
-	Routes      []RouteGroup  `yaml:"routes"`
-	LifeCycle   string        `yaml:"lifeCycle"`
+	Import     Import        `yaml:"import"`
+	Collection string        `yaml:"collection"`
+	Models     []ModelConfig `yaml:"model"`
+	Indexes    []Index       `yaml:"indexes"`
+	Routes     []RouteGroup  `yaml:"routes"`
+	LifeCycle  string        `yaml:"lifeCycle"`
 }

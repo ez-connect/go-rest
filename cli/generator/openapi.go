@@ -153,16 +153,8 @@ const (
 func GenerateOpenAPI(config Config, format _OpenAPIFormat) string {
 	/// Schemas
 	schemas := map[string]_Schema{}
-	for _, v := range config.EmbedModels {
+	for _, v := range config.Models {
 		properties := map[string]_Property{}
-		// r := reflect.ValueOf(v.Attributes)
-		// t := r.Type()
-		// for i := 0; i < r.NumField(); i++ {
-		// 	properties[t.Field(i).Name] = _Property{
-		// 		Type: fmt.Sprintf("%v", r.Field(i).Interface()),
-		// 	}
-		// }
-
 		for _, attr := range v.Attributes {
 			properties[attr.Name] = _Property{
 				// Type: attr.Type,
@@ -174,18 +166,6 @@ func GenerateOpenAPI(config Config, format _OpenAPIFormat) string {
 			Type:       "object",
 			Properties: properties,
 		}
-	}
-
-	properties := map[string]_Property{}
-	for _, v := range config.Model.Attributes {
-		properties[v.Name] = _Property{
-			// Type: attr.Type,
-			Type: "string",
-		}
-	}
-	schemas[config.Model.Name] = _Schema{
-		Type:       "object",
-		Properties: properties,
 	}
 
 	definition.Components.Schemas = schemas
