@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"strings"
 
 	"github.com/ez-connect/go-rest/cli/generator"
 	"github.com/ez-connect/go-rest/core"
@@ -46,25 +45,37 @@ func main() {
 	}
 
 	for _, dir := range dirs {
-		if dir.IsDir() && strings.Index(dir.Name(), "_") != 0 {
-			fmt.Println(workingDir, "/services/", dir.Name())
-			config := generator.Config{}
-			err := core.LoadConfig(fmt.Sprintf("%s/services/%s/%v", workingDir, dir.Name(), generator.Settings), &config)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			err = os.MkdirAll(fmt.Sprintf("%s/generated/%s", workingDir, dir.Name()), os.ModeDir)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			// Generate
-			generator.WriteSource(workingDir, dir.Name(), generator.Model, config)
-			generator.WriteSource(workingDir, dir.Name(), generator.Repository, config)
-			generator.WriteSource(workingDir, dir.Name(), generator.Handler, config)
-			generator.WriteSource(workingDir, dir.Name(), generator.Router, config)
+		if !dir.IsDir() {
+			continue
 		}
+
+		fmt.Println(workingDir, "/services/", dir.Name())
+		config := generator.Config{}
+		filename := fmt.Sprintf("%s/services/%s/%v", workingDir, dir.Name(), generator.Settings)
+
+		// Check for settings exists
+		if _, err := os.Stat(filename); os.IsNotExist(err) {
+			fmt.Println(fmt.Sprintf("No %s file found", generator.Settings))
+			continue
+		}
+
+		// Generate files
+		fmt.Println("Load", filename)
+		err := core.LoadConfig(filename, &config)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		err = os.MkdirAll(fmt.Sprintf("%s/generated/%s", workingDir, dir.Name()), os.ModeDir)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// Generate
+		generator.WriteSource(workingDir, dir.Name(), generator.Model, config)
+		generator.WriteSource(workingDir, dir.Name(), generator.Repository, config)
+		generator.WriteSource(workingDir, dir.Name(), generator.Handler, config)
+		generator.WriteSource(workingDir, dir.Name(), generator.Router, config)
 	}
 
 	// // Format code
