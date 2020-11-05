@@ -17,7 +17,7 @@ const (
 	Router     FileType = "router.go"
 )
 
-func GenerateFile(workingDir, packageName string, fileType FileType, config Config) {
+func WriteSource(workingDir, packageName string, fileType FileType, config Config) {
 	var v string
 	switch fileType {
 	case Model:
@@ -47,7 +47,7 @@ func GenerateFile(workingDir, packageName string, fileType FileType, config Conf
 	}
 }
 
-func GenerateFileExt(workingDir, packageName string, fileType FileType) {
+func WriteService(workingDir, packageName string, fileType FileType) {
 	var v string
 	switch fileType {
 	case Settings:

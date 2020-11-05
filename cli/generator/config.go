@@ -58,7 +58,7 @@ type RouteConfig struct {
 type Config struct {
 	Import     Import        `yaml:"import"`
 	Collection string        `yaml:"collection"`
-	Models     []ModelConfig `yaml:"model"`
+	Models     []ModelConfig `yaml:"models"`
 	Indexes    []Index       `yaml:"indexes"`
 	Routes     []RouteGroup  `yaml:"routes"`
 	LifeCycle  string        `yaml:"lifeCycle"`
