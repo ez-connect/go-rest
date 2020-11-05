@@ -1,5 +1,7 @@
 package generator
 
+const MainModelName = "Model"
+
 // Import returns all imports of all files
 type Import struct {
 	Model      []string `yaml:"model,omitempty"`
@@ -16,11 +18,18 @@ type Attribute struct {
 }
 
 type ModelConfig struct {
-	// Collection name for main model or name for embed model
+	// Default Model for the collection, using name for embed models
 	Name string `yaml:"name"`
 
 	// All attributes
 	Attributes []Attribute `yaml:"attributes"`
+}
+
+// Single index
+type SingleIndex struct {
+	Field  string `yaml:"field"`
+	Order  int    `yaml:"order,omitempty"`
+	Unique bool   `yaml:"unique,omitempty"`
 }
 
 // Will support compound order
@@ -29,16 +38,20 @@ type ModelConfig struct {
 // of the index key does not matter because MongoDB
 // can traverse the index in either direction.
 // https://docs.mongodb.com/manual/indexes/
+type CompoundIndexField struct {
+	Field string `yaml:"field"`
+	Order int    `yaml:"order,omitempty"`
+}
+
 type CompoundIndex struct {
-	Field string
-	Order int
+	Fields []CompoundIndexField `yaml:"fields,omitempty"`
+	Unique bool                 `yaml:"unique,omitempty"`
 }
 
 type Index struct {
-	Name   string   `yaml:"name,omitempty"`
-	Fields []string `yaml:"fields"`
-	Text   bool     `yaml:"text,omitempty"` // text index
-	Unique bool     `yaml:"unique,omitempty"`
+	Singles   []SingleIndex   `yaml:"singles,omitempty"`
+	Compounds []CompoundIndex `yaml:"compounds,omitempty"`
+	Texts     []string        `yaml:"texts,omitempty"`
 }
 
 type RouteGroup struct {
@@ -56,10 +69,10 @@ type RouteConfig struct {
 }
 
 type Config struct {
-	Import      Import        `yaml:"import"`
-	Model       ModelConfig   `yaml:"model"`
-	EmbedModels []ModelConfig `yaml:"embedModels"`
-	Indexes     []Index       `yaml:"indexes"`
-	Routes      []RouteGroup  `yaml:"routes"`
-	LifeCycle   string        `yaml:"lifeCycle"`
+	Import     Import        `yaml:"import"`
+	Collection string        `yaml:"collection"`
+	Models     []ModelConfig `yaml:"models"`
+	Index      Index         `yaml:"index"`
+	Routes     []RouteGroup  `yaml:"routes"`
+	LifeCycle  string        `yaml:"lifeCycle"`
 }
