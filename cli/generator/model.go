@@ -25,7 +25,7 @@ func GenerateModel(packageName string, config Config) string {
 	for _, v := range config.Models {
 		buf = append(buf, fmt.Sprintf("type %s struct {", v.Name))
 
-		if v.Name == "" {
+		if v.Name == MainModelName {
 			// ObjectID
 			buf = append(buf,
 				"\tId *primitive.ObjectID `bson:\"_id,omitempty\" json:\"id,omitempty\"`",
@@ -40,12 +40,12 @@ func GenerateModel(packageName string, config Config) string {
 
 			buf = append(buf, fmt.Sprintf(
 				"\t%s %s `bson:\"%s,omitempty\" json:\"%s,omitempty\"%s`",
-				strings.Title(v.Name), attr.Type, attr.Name, attr.Name, validate),
+				strings.Title(attr.Name), attr.Type, attr.Name, attr.Name, validate),
 			)
 		}
 
 		// Timestamp
-		if v.Name == "" {
+		if v.Name == MainModelName {
 			buf = append(buf,
 				"\tCreatedAt *time.Time `bson:\"createdAt,omitempty\" json:\"createdAt,omitempty\"`",
 			)

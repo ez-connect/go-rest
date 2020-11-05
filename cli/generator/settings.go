@@ -13,7 +13,7 @@ func GenerateSettings(packageName string) string {
 		Collection: fmt.Sprintf("%ss", packageName),
 		Models: []ModelConfig{
 			{
-				Name: "Model",
+				Name: MainModelName,
 				Attributes: []Attribute{
 					{Name: "name", Type: "string"},
 					{Name: "price", Type: "float32"},

@@ -1,5 +1,7 @@
 package generator
 
+const MainModelName = "Model"
+
 // Import returns all imports of all files
 type Import struct {
 	Model      []string `yaml:"model,omitempty"`
