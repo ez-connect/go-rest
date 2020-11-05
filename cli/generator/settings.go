@@ -10,23 +10,30 @@ import (
 
 func GenerateSettings(packageName string) string {
 	doc := Config{
-		Model: ModelConfig{
-			Name: fmt.Sprintf("%ss", packageName),
-			Attributes: []Attribute{
-				{Name: "name", Type: "string"},
-				{Name: "price", Type: "float32"},
+		Collection: fmt.Sprintf("%ss", packageName),
+		Models: []ModelConfig{
+			{
+				Name: MainModelName,
+				Attributes: []Attribute{
+					{Name: "name", Type: "string"},
+					{Name: "price", Type: "float32"},
+				},
 			},
 		},
-		EmbedModels: []ModelConfig{},
-		Indexes: []Index{
-			{
-				Fields: []string{"name"},
-				Text:   true,
-				Unique: true,
+		Index: Index{
+			Singles: []SingleIndex{
+				{Field: "name", Unique: true},
+				{Field: "price", Order: -1},
 			},
-			{
-				Fields: []string{"price"},
+			Compounds: []CompoundIndex{
+				{
+					Fields: []CompoundIndexField{
+						{Field: "name", Order: 1},
+						{Field: "price", Order: -1},
+					},
+				},
 			},
+			Texts: []string{"name", "price"},
 		},
 		Routes: []RouteGroup{
 			{

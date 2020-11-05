@@ -10,7 +10,11 @@ func TestGenerateRepository(t *testing.T) {
 	v := GenerateRepository(
 		"test",
 		Config{
-			Indexes: []Index{},
+			Index: Index{
+				Singles: []SingleIndex{
+					{Field: "name", Unique: true},
+				},
+			},
 		},
 	)
 

@@ -32,24 +32,42 @@ func GenerateRepository(packageName string, config Config) string {
 	buf = append(buf, "\tr.Driver.EnsureIndex(CollectionName, \"createdAt\", bson.M{\"createdAt\": -1}, false)")
 	buf = append(buf, "\tr.Driver.EnsureIndex(CollectionName, \"updatedAt\", bson.M{\"updatedAt\": -1}, false)")
 
-	for _, v := range config.Indexes {
-		var name string
-		if v.Name != "" {
-			name = v.Name
-		} else {
-			name = strings.Join(v.Fields, ".")
+	// Single indexes
+	for _, v := range config.Index.Singles {
+		order := 1
+		if v.Order == -1 {
+			order = -1
 		}
+		buf = append(buf, fmt.Sprintf("\tr.Driver.EnsureIndex(CollectionName, \"%s\", bson.M{\"%s\": %v}, %v)", v.Field, v.Field, order, v.Unique))
+	}
 
+	// Compound indexes
+	for _, v := range config.Index.Compounds {
+		names := []string{}
 		fields := []string{}
 		for _, f := range v.Fields {
-			if v.Text {
-				fields = append(fields, fmt.Sprintf("\"%s\" : \"text\"", f))
-			} else {
-				fields = append(fields, fmt.Sprintf("\"%s\" : 1", f))
-			}
+			names = append(names, f.Field)
+			fields = append(fields, fmt.Sprintf("\"%s\": %v", f.Field, f.Order))
 		}
-		buf = append(buf, fmt.Sprintf("\tr.Driver.EnsureIndex(CollectionName, \"%s\", bson.M{%s}, %v)", name, strings.Join(fields, ","), v.Unique))
+		buf = append(buf, fmt.Sprintf(
+			"\tr.Driver.EnsureIndex(CollectionName, \"%s\", bson.M{%s}, %v)",
+			strings.Join(names, "."),
+			strings.Join(fields, ", "),
+			v.Unique,
+		))
 	}
+
+	// Text indexes
+	texts := []string{}
+	for _, v := range config.Index.Texts {
+		texts = append(texts, fmt.Sprintf("\"%s\": \"text\"", v))
+	}
+
+	buf = append(buf, fmt.Sprintf(
+		"\tr.Driver.EnsureIndex(CollectionName, \"%s\", bson.M{%s}, false)",
+		"text",
+		strings.Join(texts, ", "),
+	))
 
 	buf = append(buf, "}\n")
 

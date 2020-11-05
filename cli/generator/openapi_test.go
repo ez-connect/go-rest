@@ -8,26 +8,8 @@ import (
 
 func TestGenerateOpenAP(t *testing.T) {
 	v := GenerateOpenAPI(Config{
-		Model: ModelConfig{
-			Name: "Model",
-			Attributes: []Attribute{
-				{
-					Name: "id",
-					Type: "*primitive.ObjectID",
-				},
-				{
-					Name: "name",
-					Type: "string",
-				},
-				{
-					Name: "createdAt",
-					Type: "*time.Time",
-				},
-			},
-		},
-		EmbedModels: []ModelConfig{
-			{
-				Name: "ImAModel",
+		Models: []ModelConfig{
+			{Name: "Model",
 				Attributes: []Attribute{
 					{
 						Name: "id",

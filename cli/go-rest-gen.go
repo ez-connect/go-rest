@@ -30,11 +30,11 @@ func main() {
 		}
 
 		// Generate
-		generator.GenerateFileExt(workingDir, service, generator.Settings)
-		generator.GenerateFileExt(workingDir, service, generator.Model)
-		generator.GenerateFileExt(workingDir, service, generator.Repository)
-		generator.GenerateFileExt(workingDir, service, generator.Handler)
-		generator.GenerateFileExt(workingDir, service, generator.Router)
+		generator.WriteService(workingDir, service, generator.Settings)
+		generator.WriteService(workingDir, service, generator.Model)
+		generator.WriteService(workingDir, service, generator.Repository)
+		generator.WriteService(workingDir, service, generator.Handler)
+		generator.WriteService(workingDir, service, generator.Router)
 
 		return
 	}
@@ -60,10 +60,10 @@ func main() {
 			}
 
 			// Generate
-			generator.GenerateFile(workingDir, dir.Name(), generator.Model, config)
-			generator.GenerateFile(workingDir, dir.Name(), generator.Repository, config)
-			generator.GenerateFile(workingDir, dir.Name(), generator.Handler, config)
-			generator.GenerateFile(workingDir, dir.Name(), generator.Router, config)
+			generator.WriteSource(workingDir, dir.Name(), generator.Model, config)
+			generator.WriteSource(workingDir, dir.Name(), generator.Repository, config)
+			generator.WriteSource(workingDir, dir.Name(), generator.Handler, config)
+			generator.WriteSource(workingDir, dir.Name(), generator.Router, config)
 		}
 	}
 
