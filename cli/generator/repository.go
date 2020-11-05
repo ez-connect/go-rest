@@ -58,16 +58,18 @@ func GenerateRepository(packageName string, config Config) string {
 	}
 
 	// Text indexes
-	texts := []string{}
-	for _, v := range config.Index.Texts {
-		texts = append(texts, fmt.Sprintf("\"%s\": \"text\"", v))
-	}
+	if len(config.Index.Texts) > 0 {
+		texts := []string{}
+		for _, v := range config.Index.Texts {
+			texts = append(texts, fmt.Sprintf("\"%s\": \"text\"", v))
+		}
 
-	buf = append(buf, fmt.Sprintf(
-		"\tr.Driver.EnsureIndex(CollectionName, \"%s\", bson.M{%s}, false)",
-		"text",
-		strings.Join(texts, ", "),
-	))
+		buf = append(buf, fmt.Sprintf(
+			"\tr.Driver.EnsureIndex(CollectionName, \"%s\", bson.M{%s}, false)",
+			"text",
+			strings.Join(texts, ", "),
+		))
+	}
 
 	buf = append(buf, "}\n")
 
