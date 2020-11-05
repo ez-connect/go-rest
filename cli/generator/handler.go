@@ -100,11 +100,23 @@ func GenerateHandler(packageName string, config Config) string {
 		buf = append(buf, fmt.Sprintf(lifecycle, config.LifeCycle))
 	}
 
-	buf = append(buf, fmt.Sprintf(find, strings.Title(packageName)))
-	buf = append(buf, fmt.Sprintf(insert, strings.Title(packageName)))
-	buf = append(buf, fmt.Sprintf(findOne, strings.Title(packageName)))
-	buf = append(buf, fmt.Sprintf(update, strings.Title(packageName)))
-	buf = append(buf, fmt.Sprintf(delete, strings.Title(packageName)))
+	for _, v := range config.Routes {
+		for _, c := range v.Children {
+			if strings.Contains(c.Handler, "Find") {
+				if strings.Contains(c.Handler, "FindOne") {
+					buf = append(buf, fmt.Sprintf(findOne, strings.Title(packageName)))
+				} else {
+					buf = append(buf, fmt.Sprintf(find, strings.Title(packageName)))
+				}
+			} else if strings.Contains(c.Handler, "Insert") {
+				buf = append(buf, fmt.Sprintf(insert, strings.Title(packageName)))
+			} else if strings.Contains(c.Handler, "Update") {
+				buf = append(buf, fmt.Sprintf(update, strings.Title(packageName)))
+			} else if strings.Contains(c.Handler, "Delete") {
+				buf = append(buf, fmt.Sprintf(delete, strings.Title(packageName)))
+			}
+		}
+	}
 
 	return strings.Join(buf, "\n")
 }
