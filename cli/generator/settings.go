@@ -20,6 +20,21 @@ func GenerateSettings(packageName string) string {
 				},
 			},
 		},
+		Index: Index{
+			Singles: []SingleIndex{
+				{Field: "name", Unique: true},
+				{Field: "price", Order: -1},
+			},
+			Compounds: []CompoundIndex{
+				{
+					Fields: []CompoundIndexField{
+						{Field: "name", Order: 1},
+						{Field: "price", Order: -1},
+					},
+				},
+			},
+			Texts: []string{"name", "price"},
+		},
 		Routes: []RouteGroup{
 			{
 				Path: fmt.Sprintf("/%ss", packageName),

@@ -25,22 +25,33 @@ type ModelConfig struct {
 	Attributes []Attribute `yaml:"attributes"`
 }
 
+// Single index
+type SingleIndex struct {
+	Field  string `yaml:"field"`
+	Order  int    `yaml:"order,omitempty"`
+	Unique bool   `yaml:"unique,omitempty"`
+}
+
 // Will support compound order
 // For a single-field index and sort operations,
 // the sort order (i.e. ascending or descending)
 // of the index key does not matter because MongoDB
 // can traverse the index in either direction.
 // https://docs.mongodb.com/manual/indexes/
+type CompoundIndexField struct {
+	Field string `yaml:"field"`
+	Order int    `yaml:"order,omitempty"`
+}
+
 type CompoundIndex struct {
-	Field string
-	Order int
+	Fields []CompoundIndexField `yaml:"fields,omitempty"`
+	Unique bool                 `yaml:"unique,omitempty"`
 }
 
 type Index struct {
-	Name   string   `yaml:"name,omitempty"`
-	Fields []string `yaml:"fields"`
-	Text   bool     `yaml:"text,omitempty"` // text index
-	Unique bool     `yaml:"unique,omitempty"`
+	Singles   []SingleIndex   `yaml:"singles,omitempty"`
+	Compounds []CompoundIndex `yaml:"compounds,omitempty"`
+	Texts     []string        `yaml:"texts,omitempty"`
 }
 
 type RouteGroup struct {
@@ -61,7 +72,7 @@ type Config struct {
 	Import     Import        `yaml:"import"`
 	Collection string        `yaml:"collection"`
 	Models     []ModelConfig `yaml:"models"`
-	Indexes    []Index       `yaml:"indexes"`
+	Index      Index         `yaml:"index"`
 	Routes     []RouteGroup  `yaml:"routes"`
 	LifeCycle  string        `yaml:"lifeCycle"`
 }
