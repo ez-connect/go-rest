@@ -44,6 +44,7 @@ func main() {
 		log.Fatal(err)
 	}
 
+	var openAPI string
 	for _, dir := range dirs {
 		if !dir.IsDir() {
 			continue
@@ -59,23 +60,40 @@ func main() {
 			continue
 		}
 
-		// Generate files
+		// Load config file
 		fmt.Println("Load", filename)
 		err := core.LoadConfig(filename, &config)
 		if err != nil {
 			log.Fatal(err)
 		}
 
+		// Create folder if not exists
 		err = os.MkdirAll(fmt.Sprintf("%s/generated/%s", workingDir, dir.Name()), os.ModeDir)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		// Generate
+		// Generate source
 		gen.WriteSource(workingDir, dir.Name(), gen.Model, config)
 		gen.WriteSource(workingDir, dir.Name(), gen.Repository, config)
 		gen.WriteSource(workingDir, dir.Name(), gen.Handler, config)
 		gen.WriteSource(workingDir, dir.Name(), gen.Router, config)
+
+		// Open API
+		openAPI = gen.GenerateOpenAPI(config, gen.YML)
+	}
+
+	// Write Open API
+	f, err := os.Create(fmt.Sprintf("%s/generated/openapi.yml", workingDir))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer f.Close()
+
+	_, err = f.WriteString(openAPI)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	// // Format code
