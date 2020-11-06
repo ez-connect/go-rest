@@ -2,134 +2,17 @@ package gen
 
 import (
 	"encoding/json"
+	"fmt"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
 
-//
-// https://swagger.io/specification/
-//
-
-type _Contact struct {
-	Name  string `json:"name" yaml:"name"`
-	URL   string `json:"url" yaml:"url"`
-	Email string `json:"email" yaml:"email"`
-}
-
-type _License struct {
-	Name string `json:"name" yaml:"name"`
-	URL  string `json:"url" yaml:"url"`
-}
-
-type _Info struct {
-	Title          string   `json:"title" yaml:"title"`
-	Description    string   `json:"description" yaml:"description"`
-	TermsOfService string   `json:"termsOfService" yaml:"termsOfService"`
-	Contact        _Contact `json:"contact" yaml:"contact"`
-	License        _License `json:"license" yaml:"license"`
-	Version        string   `json:"version" yaml:"version"`
-}
-
-type _ServerVariable struct {
-	Enum        []string `json:"enum" yaml:"enum"`
-	Default     string   `json:"default" yaml:"enum"`
-	Description string   `json:"description" yaml:"enum"`
-}
-
-type _Server struct {
-	URL         string                     `json:"url" yaml:"url"`
-	Description string                     `json:"description" yaml:"description"`
-	Variables   map[string]_ServerVariable `json:"variables,omitempty" yaml:"variables,omitempty"`
-}
-
-type _ExternalDoc struct {
-	Description string `json:"description" yaml:"description"`
-	Url         string `json:"url" yaml:"url"`
-}
-
-type _Parameter struct {
-	// Reference Object
-	Ref string `json:"$ref,omitempty" yaml:"$ref,omitempty"`
-
-	// Or, Parameter Object
-	Name            string `json:"name" yaml:"name"`
-	In              string `json:"in" yaml:"in"`
-	Description     string `json:"description" yaml:"description"`
-	Required        bool   `json:"required,omitempty" yaml:"required"`
-	Deprecated      bool   `json:"deprecated,omitempty" yaml:"deprecated"`
-	AllowEmptyValue bool   `json:"allowEmptyValue,omitempty" yaml:"allowEmptyValue"`
-}
-
-type _Property struct {
-	Type string `json:"type"`
-}
-
-type _Schema struct {
-	Ref string `json:"$ref,omitempty" yaml:"$ref,omitempty"`
-
-	Type       string               `json:"type" yaml:"type"`
-	Required   []string             `json:"required,omitempty" yaml:"required,omitempty"`
-	Properties map[string]_Property `json:"properties" yaml:"properties"`
-}
-
-type _MediaType struct {
-	Schema   _Schema     `json:"schema" yaml:"schema"`
-	Example  interface{} `json:"example" yaml:"example"`
-	Examples interface{} `json:"examples" yaml:"examples"`
-	Encoding interface{} `json:"encoding" yaml:"encoding"`
-}
-
-type _RequestBody struct {
-	Ref string `json:"$ref,omitempty" yaml:"$ref,omitempty"`
-
-	Description string     `json:"description" yaml:"description"`
-	Content     _MediaType `json:"content" yaml:"content"`
-	Required    bool       `json:"required" yaml:"required"`
-}
-
-type _Operation struct {
-	Tags         []string     `json:"tags" yaml:"tags"`
-	Summary      string       `json:"summary" yaml:"summary"`
-	Description  string       `json:"description" yaml:"description"`
-	ExternalDocs _ExternalDoc `json:"externalDocs" yaml:"externalDocs"`
-	OperationId  string       `json:"operationId" yaml:"operationId"`
-	Parameters   []_Parameter `json:"parameters" yaml:"parameters"`
-	Requestbody  _RequestBody `json:"requestBody" yaml:"requestBody"`
-}
-
-type _Path struct {
-	Ref string `json:"$ref,omitempty" yaml:"$ref,omitempty"`
-
-	Summary     string     `json:"summary" yaml:"summary"`
-	Description string     `json:"description" yaml:"description"`
-	Get         _Operation `json:"get" yaml:"get"`
-}
-
-type _Components struct {
-	Schemas map[string]_Schema `json:"schemas" yaml:"schemas"`
-}
-
-type _Security struct {
-}
-
-type _Tag struct {
-}
-
-type _Definition struct {
-	OpenAPI      string           `json:"openapi" yaml:"openapi"`
-	Info         _Info            `json:"info" yaml:"info"`
-	Servers      []_Server        `json:"servers" yaml:"servers"`
-	Paths        map[string]_Path `json:"paths" yaml:"paths"`
-	Components   _Components      `json:"components" yaml:"components"`
-	Security     []_Security      `json:"security" yaml:"security"`
-	Tags         []_Tag           `json:"tags" yaml:"tags"`
-	ExternalDocs []_ExternalDoc   `json:"externalDocs" yaml:"externalDocs"`
-}
-
 var definition = _Definition{
 	OpenAPI: "3.0.0",
 	Info: _Info{
-		Title: "Example",
+		Title:   "Example",
+		Version: "0.1.0",
 	},
 	Servers: []_Server{
 		{URL: "https://example.com"},
@@ -138,31 +21,31 @@ var definition = _Definition{
 	Components: _Components{
 		Schemas: map[string]_Schema{},
 	},
-	Security:     []_Security{},
-	Tags:         []_Tag{},
-	ExternalDocs: []_ExternalDoc{},
+	Security: []_Security{},
+	Tags:     []_Tag{},
 }
 
-type _OpenAPIFormat string
-
-const (
-	_JSON _OpenAPIFormat = "json"
-	_YML  _OpenAPIFormat = "yml"
-)
-
-func GenerateOpenAPI(config Config, format _OpenAPIFormat) string {
+func GenerateOpenAPI(config Config, format OpenAPIFormat) string {
 	/// Schemas
-	schemas := map[string]_Schema{}
+	schemas := definition.Components.Schemas //map[string]_Schema{}
 	for _, v := range config.Models {
 		properties := map[string]_Property{}
 		for _, attr := range v.Attributes {
-			properties[attr.Name] = _Property{
-				// Type: attr.Type,
-				Type: "string",
+			var attrType string
+			if strings.Contains(attr.Type, "int") {
+				attrType = "integer"
+			} else if strings.Contains(attr.Type, "float") {
+				attrType = "number"
+			} else if attr.Type == "string" || strings.Contains(attr.Type, "ObjectID") || strings.Contains(attr.Type, "Time") {
+				attrType = "string"
+			} else {
+				attrType = "object"
 			}
+
+			properties[attr.Name] = _Property{Type: attrType}
 		}
 
-		schemas[v.Name] = _Schema{
+		schemas[fmt.Sprintf("%s.%s", config.Collection, v.Name)] = _Schema{
 			Type:       "object",
 			Properties: properties,
 		}
@@ -171,22 +54,49 @@ func GenerateOpenAPI(config Config, format _OpenAPIFormat) string {
 	definition.Components.Schemas = schemas
 
 	/// Routes
-	paths := map[string]_Path{}
-	// for _, g := range config.Routes {
-	// 	paths[g.Path] := _Path{
-	// 		Get: _Operation{
-	// 			Summary: v.,
+	paths := definition.Paths
+	for _, g := range config.Routes {
+		for _, r := range g.Children {
+			endpoint := fmt.Sprintf("%s%s", g.Path, r.Path)
+			var path = paths[endpoint]
+			if &path == nil {
+				path = _Path{}
+			}
 
-	// 		},
-	// 	}
-	// }
+			operation := _Operation{
+				Summary: r.Handler,
+				Responses: map[int]_Response{
+					200: {
+						Description: "OK",
+						Content: map[string]_MediaType{
+							"application/json": {
+								Schema: _Schema{
+									Type: "object",
+								},
+							},
+						},
+					},
+				},
+			}
 
-	definition.Paths = paths
+			method := strings.ToLower(r.Method)
+			switch method {
+			case "get":
+				path.Get = operation
+			case "put":
+				path.Put = operation
+			case "post":
+				path.Post = operation
+			}
 
-	if format == _JSON {
+			paths[endpoint] = path
+		}
+	}
+
+	if format == JSON {
 		data, _ := json.Marshal(definition)
 		return string(data)
-	} else if format == _YML {
+	} else if format == YML {
 		data, _ := yaml.Marshal(definition)
 		return string(data)
 	} else {

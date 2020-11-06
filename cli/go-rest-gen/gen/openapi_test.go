@@ -10,6 +10,7 @@ import (
 
 func TestGenerateOpenAP(t *testing.T) {
 	v := GenerateOpenAPI(Config{
+		Collection: "test",
 		Models: []ModelConfig{
 			{Name: "Model",
 				Attributes: []Attribute{
@@ -22,13 +23,53 @@ func TestGenerateOpenAP(t *testing.T) {
 						Type: "string",
 					},
 					{
+						Name: "quantity",
+						Type: "int32",
+					},
+					{
+						Name: "price",
+						Type: "float32",
+					},
+					{
 						Name: "createdAt",
 						Type: "*time.Time",
 					},
 				},
 			},
 		},
-	}, _YML)
+		Routes: []RouteGroup{
+			{
+				Path: "/example",
+				Children: []RouteConfig{
+					{
+						Path:    "",
+						Method:  "GET",
+						Handler: "FindAll",
+					},
+					{
+						Path:    "",
+						Method:  "POST",
+						Handler: "Insert",
+					},
+					{
+						Path:    "/:id",
+						Method:  "GET",
+						Handler: "FindOne",
+					},
+					{
+						Path:    "/:id",
+						Method:  "PUT",
+						Handler: "Update",
+					},
+					{
+						Path:    "/:id",
+						Method:  "DELETE",
+						Handler: "Delete",
+					},
+				},
+			},
+		},
+	}, YML)
 
 	f, err := os.Create("openapi_test.yml")
 	if err != nil {
