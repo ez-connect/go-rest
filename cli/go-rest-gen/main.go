@@ -7,7 +7,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/ez-connect/go-rest/cli/generator"
+	"github.com/ez-connect/go-rest/cli/go-rest-gen/gen"
 	"github.com/ez-connect/go-rest/core"
 )
 
@@ -29,11 +29,11 @@ func main() {
 		}
 
 		// Generate
-		generator.WriteService(workingDir, service, generator.Settings)
-		generator.WriteService(workingDir, service, generator.Model)
-		generator.WriteService(workingDir, service, generator.Repository)
-		generator.WriteService(workingDir, service, generator.Handler)
-		generator.WriteService(workingDir, service, generator.Router)
+		gen.WriteService(workingDir, service, gen.Settings)
+		gen.WriteService(workingDir, service, gen.Model)
+		gen.WriteService(workingDir, service, gen.Repository)
+		gen.WriteService(workingDir, service, gen.Handler)
+		gen.WriteService(workingDir, service, gen.Router)
 
 		return
 	}
@@ -50,12 +50,12 @@ func main() {
 		}
 
 		fmt.Println(workingDir, "/services/", dir.Name())
-		config := generator.Config{}
-		filename := fmt.Sprintf("%s/services/%s/%v", workingDir, dir.Name(), generator.Settings)
+		config := gen.Config{}
+		filename := fmt.Sprintf("%s/services/%s/%v", workingDir, dir.Name(), gen.Settings)
 
 		// Check for settings exists
 		if _, err := os.Stat(filename); os.IsNotExist(err) {
-			fmt.Println(fmt.Sprintf("No %s file found", generator.Settings))
+			fmt.Println(fmt.Sprintf("No %s file found", gen.Settings))
 			continue
 		}
 
@@ -72,10 +72,10 @@ func main() {
 		}
 
 		// Generate
-		generator.WriteSource(workingDir, dir.Name(), generator.Model, config)
-		generator.WriteSource(workingDir, dir.Name(), generator.Repository, config)
-		generator.WriteSource(workingDir, dir.Name(), generator.Handler, config)
-		generator.WriteSource(workingDir, dir.Name(), generator.Router, config)
+		gen.WriteSource(workingDir, dir.Name(), gen.Model, config)
+		gen.WriteSource(workingDir, dir.Name(), gen.Repository, config)
+		gen.WriteSource(workingDir, dir.Name(), gen.Handler, config)
+		gen.WriteSource(workingDir, dir.Name(), gen.Router, config)
 	}
 
 	// // Format code
