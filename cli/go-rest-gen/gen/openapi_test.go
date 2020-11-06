@@ -1,6 +1,8 @@
 package gen
 
 import (
+	"log"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -26,8 +28,19 @@ func TestGenerateOpenAP(t *testing.T) {
 				},
 			},
 		},
-	}, _JSON)
+	}, _YML)
 
-	t.Error(v)
+	f, err := os.Create("openapi_test.yml")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer f.Close()
+
+	_, err = f.WriteString(v)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	assert.NotEmpty(t, v)
 }
