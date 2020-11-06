@@ -6,9 +6,9 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type _ReferenceObject struct {
-	Ref string `json:"$ref,omitempty" yaml:"$ref,omitempty"`
-}
+//
+// https://swagger.io/specification/
+//
 
 type _Contact struct {
 	Name  string `json:"name" yaml:"name"`
@@ -49,7 +49,7 @@ type _ExternalDoc struct {
 
 type _Parameter struct {
 	// Reference Object
-	_ReferenceObject
+	Ref string `json:"$ref,omitempty" yaml:"$ref,omitempty"`
 
 	// Or, Parameter Object
 	Name            string `json:"name" yaml:"name"`
@@ -65,7 +65,7 @@ type _Property struct {
 }
 
 type _Schema struct {
-	_ReferenceObject
+	Ref string `json:"$ref,omitempty" yaml:"$ref,omitempty"`
 
 	Type       string               `json:"type" yaml:"type"`
 	Required   []string             `json:"required,omitempty" yaml:"required,omitempty"`
@@ -80,7 +80,7 @@ type _MediaType struct {
 }
 
 type _RequestBody struct {
-	_ReferenceObject
+	Ref string `json:"$ref,omitempty" yaml:"$ref,omitempty"`
 
 	Description string     `json:"description" yaml:"description"`
 	Content     _MediaType `json:"content" yaml:"content"`
@@ -98,7 +98,7 @@ type _Operation struct {
 }
 
 type _Path struct {
-	_ReferenceObject
+	Ref string `json:"$ref,omitempty" yaml:"$ref,omitempty"`
 
 	Summary     string     `json:"summary" yaml:"summary"`
 	Description string     `json:"description" yaml:"description"`
