@@ -3,6 +3,7 @@ package gen
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"strings"
 
 	"gopkg.in/yaml.v3"
@@ -51,13 +52,13 @@ func GenerateOpenAPI(config Config, format OpenAPIFormat) string {
 		}
 	}
 
-	definition.Components.Schemas = schemas
-
 	/// Routes
 	paths := definition.Paths
 	for _, g := range config.Routes {
+		definition.Tags = append(definition.Tags, _Tag{Name: g.Path})
 		for _, r := range g.Children {
-			endpoint := fmt.Sprintf("%s%s", g.Path, r.Path)
+			re := regexp.MustCompile(`:(\w+)`)
+			endpoint := re.ReplaceAllString(fmt.Sprintf("%s%s", g.Path, r.Path), `{$1}`)
 			var path = paths[endpoint]
 			if &path == nil {
 				path = _Path{}
@@ -65,6 +66,7 @@ func GenerateOpenAPI(config Config, format OpenAPIFormat) string {
 
 			operation := _Operation{
 				Summary: r.Handler,
+				Tags:    []string{g.Path},
 				Responses: map[int]_Response{
 					200: {
 						Description: "OK",

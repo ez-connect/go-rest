@@ -130,6 +130,7 @@ type _Security struct {
 }
 
 type _Tag struct {
+	Name string `json:"name" yaml:"name"`
 }
 
 type _Definition struct {
