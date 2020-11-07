@@ -27,7 +27,7 @@ https://pkg.go.dev/github.com/ez-connect/go-rest
 
 Create a new service naming  `hello`
 
-``bash
+```bash
 go-rest-gen -new hello
 ```
 
