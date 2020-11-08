@@ -3,6 +3,7 @@ package gen
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"regexp"
 	"strings"
 
@@ -81,14 +82,23 @@ func GenerateOpenAPI(config Config, format OpenAPIFormat) string {
 				},
 			}
 
-			method := strings.ToLower(r.Method)
-			switch method {
-			case "get":
+			switch r.Method {
+			case http.MethodGet:
 				path.Get = operation
-			case "put":
+			case http.MethodPut:
 				path.Put = operation
-			case "post":
+			case http.MethodPost:
 				path.Post = operation
+			case http.MethodDelete:
+				path.Delete = operation
+			case http.MethodOptions:
+				path.Options = operation
+			case http.MethodHead:
+				path.Head = operation
+			case http.MethodPatch:
+				path.Patch = operation
+			case http.MethodTrace:
+				path.Trace = operation
 			}
 
 			paths[endpoint] = path
