@@ -46,7 +46,7 @@ func (h *HandlerBase) Find(c echo.Context,
 	err := h.db.Find(h.collection, filter, option, projection, docs)
 
 	if h.lifeCycle.AfterFind != nil {
-		if err := h.lifeCycle.BeforeFind(c, &filter, &option, &projection); err != nil {
+		if err := h.lifeCycle.AfterFind(c, docs); err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 	}
