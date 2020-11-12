@@ -24,13 +24,13 @@ func GenerateRoutes(packageName string, config Config) string {
 	buf = append(buf, "type Router struct {")
 	// buf = append(buf, fmt.Sprintf("\t%s.Router", packageName))
 	buf = append(buf, "\trest.RouterBase")
+	buf = append(buf, "\tHandler")
 	buf = append(buf, "}\n")
 
 	buf = append(buf, "func (r *Router) Init(e *echo.Echo, db db.DatabaseBase) {")
-	buf = append(buf, "\th := Handler{}")
-	buf = append(buf, "\th.Init(db, CollectionName)")
-	buf = append(buf, "\th.Repo.Init(db)")
-	buf = append(buf, "\th.Repo.EnsureIndexs()\n")
+	buf = append(buf, "\tr.Handler.Init(db, CollectionName)")
+	buf = append(buf, "\tr.Handler.Repo.Init(db)")
+	buf = append(buf, "\tr.Handler.Repo.EnsureIndexs()\n")
 
 	for i, v := range config.Routes {
 		buf = append(buf, fmt.Sprintf("\tg%v := e.Group(\"%s\")", i, v.Path))
@@ -39,7 +39,7 @@ func GenerateRoutes(packageName string, config Config) string {
 		}
 		for _, r := range v.Children {
 			buf = append(buf,
-				fmt.Sprintf("\tg%v.%s(\"%s\", h.%s)", i, r.Method, r.Path, r.Handler),
+				fmt.Sprintf("\tg%v.%s(\"%s\", r.Handler.%s)", i, r.Method, r.Path, r.Handler),
 			)
 		}
 	}
