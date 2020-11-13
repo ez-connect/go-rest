@@ -68,7 +68,7 @@ func GenerateModelService(packageName string) string {
 	buf = append(buf, fmt.Sprintf("\t\"app/generated/%s\"", packageName))
 	buf = append(buf, ")\n")
 	buf = append(buf, "type Model struct {")
-	buf = append(buf, fmt.Sprintf("\t%s.Model", packageName))
+	buf = append(buf, fmt.Sprintf("\t%s.Model `bson:\",inline\"`", packageName))
 	buf = append(buf, "}\n")
 
 	return strings.Join(buf, "\n")
