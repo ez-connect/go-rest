@@ -42,7 +42,8 @@ func GetQueryParam(c echo.Context, v interface{}) (bson.M, error) {
 	} else {
 		params := map[string]string{}
 		for paramName, param := range c.QueryParams() {
-			if len(param) > 0 && !strings.HasPrefix(paramName, "_") {
+			// skip option and text search params
+			if len(param) > 0 && !strings.HasPrefix(paramName, "_") && paramName != "q" {
 				params[paramName] = param[0]
 			}
 		}
