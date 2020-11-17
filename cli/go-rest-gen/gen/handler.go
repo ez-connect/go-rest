@@ -8,6 +8,8 @@ import (
 var initHandler = `func (h *Handler) Init(db db.DatabaseBase, collection string, repo *Repository) {
 	var r rest.RepositoryInterface = &repo.RepositoryBase
 	h.HandlerBase.Init(db, collection, r)
+	r.EnsureIndexs()
+	%s
 }
 `
 
@@ -93,7 +95,11 @@ func GenerateHandler(packageName string, config Config) string {
 
 	buf = append(buf, "///////////////////////////////////////////////////////////////////\n")
 
-	buf = append(buf, fmt.Sprint(initHandler))
+	if config.LifeCycle != "" {
+		buf = append(buf, fmt.Sprintf(initHandler, fmt.Sprintf("r.RegisterLifeCycle(%s)", config.LifeCycle)))
+	} else {
+		buf = append(buf, fmt.Sprintf(initHandler, ""))
+	}
 
 	// Generate all, although some handlers will not be used
 	// to ignore linting error of imported and not used
