@@ -2,6 +2,7 @@ package rest
 
 import (
 	"github.com/ez-connect/go-rest/db"
+	"github.com/ez-connect/go-rest/rest/filter"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -16,15 +17,15 @@ type RepositoryInterface interface {
 	EnsureIndexs()
 	Init(db db.DatabaseBase, collection string)
 	RegisterLifeCycle(l LifeCycle)
-	Find(filter interface{}, option db.FindOption,
+	Find(params filter.Params, filter interface{}, option db.FindOption,
 		projection, docs interface{}) (error, int64)
-	FindOne(filter, projection interface{}, doc interface{}) error
-	Aggregate(pipeline, docs interface{}) (int64, error)
-	AggregateOne(pipeline interface{}, doc interface{}) error
-	Head(filter interface{}) int64
-	Insert(doc interface{}) (interface{}, error)
-	UpdateOne(filter, doc interface{}) (interface{}, error)
-	DeleteOne(filter interface{}) (interface{}, error)
+	FindOne(params filter.Params, filter, projection interface{}, doc interface{}) error
+	Aggregate(params filter.Params, pipeline, docs interface{}) (int64, error)
+	AggregateOne(params filter.Params, pipeline interface{}, doc interface{}) error
+	Head(params filter.Params, filter interface{}) int64
+	Insert(params filter.Params, doc interface{}) (interface{}, error)
+	UpdateOne(params filter.Params, filter, doc interface{}) (interface{}, error)
+	DeleteOne(params filter.Params, filter interface{}) (interface{}, error)
 }
 
 func (r *RepositoryBase) Init(db db.DatabaseBase, collection string) {
@@ -37,11 +38,11 @@ func (r *RepositoryBase) RegisterLifeCycle(l LifeCycle) {
 	r.lifeCycle = l
 }
 
-func (r *RepositoryBase) Find(filter interface{}, option db.FindOption,
+func (r *RepositoryBase) Find(params filter.Params, filter interface{}, option db.FindOption,
 	projection, docs interface{}) (error, int64) {
 
 	if r.lifeCycle.BeforeFind != nil {
-		if err := r.lifeCycle.BeforeFind(&filter, &option, &projection); err != nil {
+		if err := r.lifeCycle.BeforeFind(params, &filter, &option, &projection); err != nil {
 			return err, 0
 		}
 	}
@@ -49,7 +50,7 @@ func (r *RepositoryBase) Find(filter interface{}, option db.FindOption,
 	err := r.Driver.Find(r.collection, filter, option, projection, docs)
 
 	if r.lifeCycle.AfterFind != nil {
-		if err := r.lifeCycle.AfterFind(docs); err != nil {
+		if err := r.lifeCycle.AfterFind(params, docs); err != nil {
 			return err, 0
 		}
 	}
@@ -62,10 +63,10 @@ func (r *RepositoryBase) Find(filter interface{}, option db.FindOption,
 	return nil, total
 }
 
-func (r *RepositoryBase) FindOne(filter, projection interface{}, doc interface{}) error {
+func (r *RepositoryBase) FindOne(params filter.Params, filter, projection interface{}, doc interface{}) error {
 
 	if r.lifeCycle.BeforeFindOne != nil {
-		err := r.lifeCycle.BeforeFindOne(filter, projection)
+		err := r.lifeCycle.BeforeFindOne(params, filter, projection)
 		if err != nil {
 			return err
 		}
@@ -76,7 +77,7 @@ func (r *RepositoryBase) FindOne(filter, projection interface{}, doc interface{}
 	}
 
 	if r.lifeCycle.AfterFindOne != nil {
-		if err := r.lifeCycle.AfterFindOne(doc); err != nil {
+		if err := r.lifeCycle.AfterFindOne(params, doc); err != nil {
 			return err
 		}
 	}
@@ -84,7 +85,7 @@ func (r *RepositoryBase) FindOne(filter, projection interface{}, doc interface{}
 	return nil
 }
 
-func (r *RepositoryBase) Aggregate(pipeline, docs interface{}) (int64, error) {
+func (r *RepositoryBase) Aggregate(params filter.Params, pipeline, docs interface{}) (int64, error) {
 
 	err := r.Driver.Aggregate(r.collection, pipeline, docs)
 	if err != nil {
@@ -95,7 +96,7 @@ func (r *RepositoryBase) Aggregate(pipeline, docs interface{}) (int64, error) {
 	return total, nil
 }
 
-func (r *RepositoryBase) AggregateOne(pipeline interface{}, doc interface{}) error {
+func (r *RepositoryBase) AggregateOne(params filter.Params, pipeline interface{}, doc interface{}) error {
 
 	err := r.Driver.AggregateOne(r.collection, pipeline, doc)
 	if err != nil {
@@ -106,14 +107,14 @@ func (r *RepositoryBase) AggregateOne(pipeline interface{}, doc interface{}) err
 }
 
 /// Find one document without body
-func (r *RepositoryBase) Head(filter interface{}) int64 {
+func (r *RepositoryBase) Head(params filter.Params, filter interface{}) int64 {
 	count, _ := r.Driver.Count(r.collection, filter)
 	return count
 }
 
-func (r *RepositoryBase) Insert(doc interface{}) (interface{}, error) {
+func (r *RepositoryBase) Insert(params filter.Params, doc interface{}) (interface{}, error) {
 	if r.lifeCycle.BeforeInsert != nil {
-		if err := r.lifeCycle.BeforeInsert(doc); err != nil {
+		if err := r.lifeCycle.BeforeInsert(params, doc); err != nil {
 			return nil, err
 		}
 	}
@@ -124,7 +125,7 @@ func (r *RepositoryBase) Insert(doc interface{}) (interface{}, error) {
 	}
 
 	if r.lifeCycle.AfterInsert != nil {
-		if err := r.lifeCycle.AfterInsert(doc); err != nil {
+		if err := r.lifeCycle.AfterInsert(params, doc); err != nil {
 			return nil, err
 		}
 	}
@@ -132,9 +133,9 @@ func (r *RepositoryBase) Insert(doc interface{}) (interface{}, error) {
 	return res, nil
 }
 
-func (r *RepositoryBase) UpdateOne(filter, doc interface{}) (interface{}, error) {
+func (r *RepositoryBase) UpdateOne(params filter.Params, filter, doc interface{}) (interface{}, error) {
 	if r.lifeCycle.BeforeUpdateOne != nil {
-		if err := r.lifeCycle.BeforeUpdateOne(filter, doc); err != nil {
+		if err := r.lifeCycle.BeforeUpdateOne(params, filter, doc); err != nil {
 			return nil, err
 		}
 	}
@@ -145,7 +146,7 @@ func (r *RepositoryBase) UpdateOne(filter, doc interface{}) (interface{}, error)
 	}
 
 	if r.lifeCycle.AfterUpdateOne != nil {
-		if err := r.lifeCycle.AfterUpdateOne(doc); err != nil {
+		if err := r.lifeCycle.AfterUpdateOne(params, doc); err != nil {
 			return nil, err
 		}
 	}
@@ -153,9 +154,9 @@ func (r *RepositoryBase) UpdateOne(filter, doc interface{}) (interface{}, error)
 	return res, nil
 }
 
-func (r *RepositoryBase) DeleteOne(filter interface{}) (interface{}, error) {
+func (r *RepositoryBase) DeleteOne(params filter.Params, filter interface{}) (interface{}, error) {
 	if r.lifeCycle.BeforeDeleteOne != nil {
-		if err := r.lifeCycle.BeforeDeleteOne(filter); err != nil {
+		if err := r.lifeCycle.BeforeDeleteOne(params, filter); err != nil {
 			return nil, err
 		}
 	}
@@ -166,7 +167,7 @@ func (r *RepositoryBase) DeleteOne(filter interface{}) (interface{}, error) {
 	}
 
 	if r.lifeCycle.AfterDeleteOne != nil {
-		if err := r.lifeCycle.AfterDeleteOne(res); err != nil {
+		if err := r.lifeCycle.AfterDeleteOne(params, res); err != nil {
 			return nil, err
 		}
 	}

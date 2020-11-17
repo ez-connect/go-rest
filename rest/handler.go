@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/ez-connect/go-rest/db"
+	"github.com/ez-connect/go-rest/rest/filter"
 	"github.com/labstack/echo/v4"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -30,11 +31,16 @@ func (h *HandlerBase) Init(db db.DatabaseBase, collection string, repo Repositor
 	h.repo.Init(db, collection)
 }
 
-func (h *HandlerBase) Find(c echo.Context,
-	filter interface{}, option db.FindOption,
-	projection, docs interface{}) error {
+func (h *HandlerBase) Find(c echo.Context, projection, docs interface{}) error {
+	params := filter.GetRawParams(c)
+	f, err := filter.Find(params, docs)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
 
-	err, total := h.repo.Find(filter, option, projection, docs)
+	o := filter.Option(params)
+
+	err, total := h.repo.Find(params, f, o, projection, docs)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -43,10 +49,15 @@ func (h *HandlerBase) Find(c echo.Context,
 	return c.JSON(http.StatusOK, docs)
 }
 
-func (h *HandlerBase) FindOne(c echo.Context,
-	filter, projection interface{}, doc interface{}) error {
+func (h *HandlerBase) FindOne(c echo.Context, projection interface{}, doc interface{}) error {
 
-	if err := h.repo.FindOne(filter, projection, doc); err != nil {
+	params := filter.GetRawParams(c)
+	f, err := filter.FindOne(params, doc)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	if err := h.repo.FindOne(params, f, projection, doc); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
@@ -56,7 +67,8 @@ func (h *HandlerBase) FindOne(c echo.Context,
 func (h *HandlerBase) Aggregate(c echo.Context,
 	pipeline, docs interface{}) error {
 
-	total, err := h.repo.Aggregate(pipeline, docs)
+	params := filter.GetRawParams(c)
+	total, err := h.repo.Aggregate(params, pipeline, docs)
 	if err == nil {
 		c.Response().Header().Set(HeaderTotalCount, strconv.Itoa(int(total)))
 		return c.JSON(http.StatusOK, docs)
@@ -68,7 +80,8 @@ func (h *HandlerBase) Aggregate(c echo.Context,
 func (h *HandlerBase) AggregateOne(c echo.Context,
 	pipeline interface{}, doc interface{}) error {
 
-	err := h.repo.AggregateOne(pipeline, doc)
+	params := filter.GetRawParams(c)
+	err := h.repo.AggregateOne(params, pipeline, doc)
 	if err == nil {
 		return c.JSON(http.StatusOK, doc)
 	}
@@ -77,8 +90,9 @@ func (h *HandlerBase) AggregateOne(c echo.Context,
 }
 
 /// Find one document without body
-func (h *HandlerBase) Head(c echo.Context, filter interface{}) error {
-	count := h.repo.Head(filter)
+func (h *HandlerBase) Head(c echo.Context, f interface{}) error {
+	params := filter.GetRawParams(c)
+	count := h.repo.Head(params, f)
 	if count > 0 {
 		c.Response().WriteHeader(http.StatusOK)
 	} else {
@@ -99,7 +113,8 @@ func (h *HandlerBase) Insert(c echo.Context, doc interface{}) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	res, err := h.repo.Insert(doc)
+	params := filter.GetRawParams(c)
+	res, err := h.repo.Insert(params, doc)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -107,14 +122,19 @@ func (h *HandlerBase) Insert(c echo.Context, doc interface{}) error {
 	return c.JSON(http.StatusCreated, res)
 }
 
-func (h *HandlerBase) UpdateOne(c echo.Context,
-	filter, doc interface{}) error {
+func (h *HandlerBase) UpdateOne(c echo.Context, doc interface{}) error {
 
 	if err := Bind(c, doc); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	res, err := h.repo.UpdateOne(filter, bson.M{"$set": doc})
+	params := filter.GetRawParams(c)
+	f, err := filter.FindOne(params, doc)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	res, err := h.repo.UpdateOne(params, f, bson.M{"$set": doc})
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -122,8 +142,15 @@ func (h *HandlerBase) UpdateOne(c echo.Context,
 	return c.JSON(http.StatusOK, res)
 }
 
-func (h *HandlerBase) DeleteOne(c echo.Context, filter interface{}) error {
-	res, err := h.repo.DeleteOne(filter)
+func (h *HandlerBase) DeleteOne(c echo.Context, doc interface{}) error {
+
+	params := filter.GetRawParams(c)
+	f, err := filter.FindOne(params, doc)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	res, err := h.repo.DeleteOne(params, f)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}

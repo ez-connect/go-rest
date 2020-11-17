@@ -14,14 +14,8 @@ var initHandler = `func (h *Handler) Init(db db.DatabaseBase, collection string,
 `
 
 var find = `func (h *Handler) Find%s(c echo.Context) error {
-	f, err := filter.Find(c, &Model{})
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	o := filter.Option(c)
 	docs := []Model{}
-	return h.Find(c, f, o, nil, &docs)
+	return h.Find(c, nil, &docs)
 }
 `
 
@@ -35,36 +29,21 @@ var insert = `func (h *Handler) Insert%s(c echo.Context) error {
 `
 
 var findOne = `func (h *Handler) FindOne%s(c echo.Context) error {
-	f, err := filter.FindOne(c, &Model{})
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
 	doc := Model{}
-	return h.FindOne(c, f, nil, &doc)
+	return h.FindOne(c, nil, &doc)
 }
 `
 
 var update = `func (h *Handler) Update%s(c echo.Context) error {
-	f, err := filter.FindOne(c, &Model{})
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
 	doc := Model{
 		UpdatedAt: core.Now(),
 	}
-	return h.UpdateOne(c, f, &doc)
+	return h.UpdateOne(c, &doc)
 }
 `
 
 var delete = `func (h *Handler) Delete%s(c echo.Context) error {
-	f, err := filter.FindOne(c, &Model{})
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	return h.DeleteOne(c, f)
+	return h.DeleteOne(c, &Model{})
 }
 `
 
@@ -73,11 +52,8 @@ func GenerateHandler(packageName string, config Config) string {
 	buf = append(buf, fmt.Sprintf("package %s\n", packageName))
 
 	buf = append(buf, "import (")
-	buf = append(buf, "\t\"net/http\"\n")
-
 	buf = append(buf, "\t\"github.com/ez-connect/go-rest/db\"")
 	buf = append(buf, "\t\"github.com/ez-connect/go-rest/core\"")
-	buf = append(buf, "\t\"github.com/ez-connect/go-rest/rest/filter\"")
 	buf = append(buf, "\t\"github.com/ez-connect/go-rest/rest\"")
 	buf = append(buf, "\t\"github.com/labstack/echo/v4\"\n")
 
