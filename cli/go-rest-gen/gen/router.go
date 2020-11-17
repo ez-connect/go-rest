@@ -5,6 +5,13 @@ import (
 	"strings"
 )
 
+var initRoute = `
+func (r *Router) Init(e *echo.Echo, db db.DatabaseBase) {
+	r.Router.Init(e, &r.Handler.Handler)
+	r.Handler.Init(db, %s.CollectionName, &r.Repo.Repository)
+}
+`
+
 func GenerateRoutes(packageName string, config Config) string {
 	buf := []string{}
 	buf = append(buf, fmt.Sprintf("package %s\n", packageName))
@@ -49,14 +56,17 @@ func GenerateRoutesService(packageName string) string {
 	buf = append(buf, fmt.Sprintf("package %s\n", packageName))
 
 	buf = append(buf, "import (")
-	// buf = append(buf, "\t\"github.com/ez-connect/go-rest/rest\"")
-	buf = append(buf, fmt.Sprintf("\t\"app/generated/%s\"", packageName))
+	buf = append(buf, fmt.Sprintf("\t\"app/generated/%s\"\n", packageName))
+	buf = append(buf, "\t\"github.com/ez-connect/go-rest/db\"")
+	buf = append(buf, "\t\"github.com/labstack/echo/v4\"")
 	buf = append(buf, ")\n")
 
 	buf = append(buf, "type Router struct {")
 	buf = append(buf, fmt.Sprintf("\t%s.Router", packageName))
-	// buf = append(buf, "\trest.RouterBase")
-	buf = append(buf, "}\n")
+	buf = append(buf, "\tHandler")
+	buf = append(buf, "}")
+
+	buf = append(buf, fmt.Sprintf(initRoute, packageName))
 
 	return strings.Join(buf, "\n")
 }

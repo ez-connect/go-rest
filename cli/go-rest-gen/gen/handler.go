@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-var _init = `func (h *Handler) Init(db db.DatabaseBase, collection string, repo *Repository) {
+var initHandler = `func (h *Handler) Init(db db.DatabaseBase, collection string, repo *Repository) {
 	var r rest.RepositoryInterface = &repo.RepositoryBase
 	h.HandlerBase.Init(db, collection, r)
 }
@@ -93,7 +93,7 @@ func GenerateHandler(packageName string, config Config) string {
 
 	buf = append(buf, "///////////////////////////////////////////////////////////////////\n")
 
-	buf = append(buf, fmt.Sprint(_init))
+	buf = append(buf, fmt.Sprint(initHandler))
 
 	// Generate all, although some handlers will not be used
 	// to ignore linting error of imported and not used
@@ -117,7 +117,7 @@ func GenerateHandlerService(packageName string) string {
 	buf = append(buf, "type Handler struct {")
 	buf = append(buf, fmt.Sprintf("\t%s.Handler", packageName))
 	buf = append(buf, "\tRepo Repository")
-	buf = append(buf, "}\n")
+	buf = append(buf, "}")
 
 	return strings.Join(buf, "\n")
 }
