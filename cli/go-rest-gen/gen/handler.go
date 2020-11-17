@@ -5,9 +5,9 @@ import (
 	"strings"
 )
 
-var lifecycle = `func (h *Handler) Init(db db.DatabaseBase, collection string) {
-	h.HandlerBase.Init(db, collection)
-	h.RegisterLifeCycle(%s)
+var _init = `func (h *Handler) Init(db db.DatabaseBase, collection string, repo *Repository) {
+	var r rest.RepositoryInterface = &repo.RepositoryBase
+	h.HandlerBase.Init(db, collection, r)
 }
 `
 
@@ -73,9 +73,7 @@ func GenerateHandler(packageName string, config Config) string {
 	buf = append(buf, "import (")
 	buf = append(buf, "\t\"net/http\"\n")
 
-	if config.LifeCycle != "" {
-		buf = append(buf, "\t\"github.com/ez-connect/go-rest/db\"")
-	}
+	buf = append(buf, "\t\"github.com/ez-connect/go-rest/db\"")
 	buf = append(buf, "\t\"github.com/ez-connect/go-rest/core\"")
 	buf = append(buf, "\t\"github.com/ez-connect/go-rest/rest/filter\"")
 	buf = append(buf, "\t\"github.com/ez-connect/go-rest/rest\"")
@@ -91,14 +89,11 @@ func GenerateHandler(packageName string, config Config) string {
 	buf = append(buf, "type Handler struct {")
 	// buf = append(buf, fmt.Sprintf("\t%s.Handler", packageName))
 	buf = append(buf, "\trest.HandlerBase")
-	buf = append(buf, "\tRepo Repository")
 	buf = append(buf, "}\n")
 
 	buf = append(buf, "///////////////////////////////////////////////////////////////////\n")
 
-	if config.LifeCycle != "" {
-		buf = append(buf, fmt.Sprintf(lifecycle, config.LifeCycle))
-	}
+	buf = append(buf, fmt.Sprint(_init))
 
 	// Generate all, although some handlers will not be used
 	// to ignore linting error of imported and not used
