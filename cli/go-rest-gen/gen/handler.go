@@ -8,7 +8,7 @@ import (
 var initHandler = `func (h *Handler) Init(db db.DatabaseBase, collection string, repo *Repository) {
 	var r rest.RepositoryInterface = &repo.RepositoryBase
 	h.HandlerBase.Init(db, collection, r)
-	r.EnsureIndexs()
+	repo.EnsureIndexs()
 	%s
 }
 `
