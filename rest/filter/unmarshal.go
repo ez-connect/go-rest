@@ -275,8 +275,10 @@ func UnmarshalQueryParam(query string, v interface{}) (map[string]interface{}, e
 	if rv.Kind() != reflect.Ptr || rv.IsNil() {
 		return nil, errors.New("Internal server error")
 	}
-	if rv.Kind() == reflect.Slice {
-		rv = reflect.New(rv.Type().Elem()).Elem()
+
+	// pointer -> element -> type of element(array) -> type of element (inside array)
+	if rv.Elem().Kind() == reflect.Slice {
+		rv = reflect.New(rv.Elem().Type().Elem())
 	}
 
 	res := bson.M{}
