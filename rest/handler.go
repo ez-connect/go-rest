@@ -7,7 +7,6 @@ import (
 	"github.com/ez-connect/go-rest/db"
 	"github.com/ez-connect/go-rest/rest/filter"
 	"github.com/labstack/echo/v4"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 ///////////////////////////////////////////////////////////////////
@@ -134,7 +133,7 @@ func (h *HandlerBase) UpdateOne(c echo.Context, doc interface{}) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	res, err := h.repo.UpdateOne(params, f, bson.M{"$set": doc})
+	res, err := h.repo.UpdateOne(params, f, doc)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
