@@ -107,13 +107,8 @@ func (h *HandlerBase) Insert(c echo.Context, doc interface{}) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	// Vaildate on insert only
-	if err := c.Validate(doc); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
 	params := filter.GetRawParams(c)
-	res, err := h.repo.Insert(params, doc)
+	res, err := h.repo.Insert(params, doc, c.Validate)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}

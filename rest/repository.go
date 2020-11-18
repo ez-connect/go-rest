@@ -22,7 +22,7 @@ type RepositoryInterface interface {
 	Aggregate(params filter.Params, pipeline, docs interface{}) (int64, error)
 	AggregateOne(params filter.Params, pipeline interface{}, doc interface{}) error
 	Head(params filter.Params, filter interface{}) int64
-	Insert(params filter.Params, doc interface{}) (interface{}, error)
+	Insert(params filter.Params, doc interface{}, validateFunc func(interface{}) error) (interface{}, error)
 	UpdateOne(params filter.Params, filter, doc interface{}) (interface{}, error)
 	DeleteOne(params filter.Params, filter interface{}) (interface{}, error)
 }
@@ -113,11 +113,16 @@ func (r *RepositoryBase) Head(params filter.Params, filter interface{}) int64 {
 	return count
 }
 
-func (r *RepositoryBase) Insert(params filter.Params, doc interface{}) (interface{}, error) {
+func (r *RepositoryBase) Insert(params filter.Params, doc interface{}, validateFunc func(interface{}) error) (interface{}, error) {
 	if r.lifeCycle.BeforeInsert != nil {
 		if err := r.lifeCycle.BeforeInsert(params, doc); err != nil {
 			return nil, err
 		}
+	}
+
+	// Vaildate on insert only
+	if err := validateFunc(doc); err != nil {
+		return nil, err
 	}
 
 	res, err := r.Driver.Insert(r.collection, doc)
