@@ -7,7 +7,6 @@ import (
 )
 
 type RepositoryBase struct {
-	RepositoryInterface
 	Driver     db.DatabaseBase
 	collection string // collection name aka a collection in NOSQL or a table in SQL
 	lifeCycle  LifeCycle
@@ -27,6 +26,8 @@ type RepositoryInterface interface {
 	UpdateOne(params filter.Params, filter, doc interface{}) (interface{}, error)
 	DeleteOne(params filter.Params, filter interface{}) (interface{}, error)
 }
+
+func (r *RepositoryBase) EnsureIndexs() {}
 
 func (r *RepositoryBase) Init(db db.DatabaseBase, collection string) {
 	r.Driver = db
