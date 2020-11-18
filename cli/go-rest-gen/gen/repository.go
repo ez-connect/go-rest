@@ -17,7 +17,6 @@ func GenerateRepository(packageName string, config Config) string {
 
 	buf = append(buf, "type Repository struct {")
 	buf = append(buf, "\trest.RepositoryBase")
-	buf = append(buf, "\trest.RepositoryInterface")
 
 	// buf = append(buf, fmt.Sprintf("\t%s.Repository", packageName))
 	for _, v := range config.Import.Repository {
