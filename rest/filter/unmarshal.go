@@ -276,6 +276,11 @@ func UnmarshalQueryParam(query string, v interface{}) (map[string]interface{}, e
 		return nil, errors.New("Internal server error")
 	}
 
+	// pointer -> element -> type of element(array) -> type of element (inside array)
+	if rv.Elem().Kind() == reflect.Slice {
+		rv = reflect.New(rv.Elem().Type().Elem())
+	}
+
 	res := bson.M{}
 	err := json.Unmarshal(buf.Bytes(), &res)
 	if err != nil {
@@ -293,6 +298,9 @@ func UnmarshalPathParams(params map[string]string, v interface{}) (map[string]in
 	}
 
 	rv = rv.Elem()
+	if rv.Kind() == reflect.Slice {
+		rv = reflect.New(rv.Type().Elem()).Elem()
+	}
 
 	res := bson.M{}
 	for key, value := range params {
