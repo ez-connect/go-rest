@@ -11,10 +11,10 @@ type Import struct {
 }
 
 type Attribute struct {
-	Name     string `yaml:"name"`
-	Type     string `yaml:"type"`
-	Required bool   `yaml:"required,omitempty"`
-	// Omitempty bool   `yaml:"omitempty,omitempty"`
+	Name        string `yaml:"name"`
+	Type        string `yaml:"type"`
+	Required    bool   `yaml:"required,omitempty"`
+	AllowsEmpty bool   `yaml:"allowsEmpty,omitempty"`
 }
 
 type ModelConfig struct {

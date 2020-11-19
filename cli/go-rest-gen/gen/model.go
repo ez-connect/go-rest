@@ -38,10 +38,17 @@ func GenerateModel(packageName string, config Config) string {
 				validate = " validate:\"required\""
 			}
 
-			buf = append(buf, fmt.Sprintf(
-				"\t%s %s `bson:\"%s,omitempty\" json:\"%s,omitempty\"%s`",
-				strings.Title(attr.Name), attr.Type, attr.Name, attr.Name, validate),
-			)
+			if !attr.AllowsEmpty {
+				buf = append(buf, fmt.Sprintf(
+					"\t%s %s `bson:\"%s,omitempty\" json:\"%s,omitempty\"%s`",
+					strings.Title(attr.Name), attr.Type, attr.Name, attr.Name, validate),
+				)
+			} else {
+				buf = append(buf, fmt.Sprintf(
+					"\t%s %s `bson:\"%s\" json:\"%s\"%s`",
+					strings.Title(attr.Name), attr.Type, attr.Name, attr.Name, validate),
+				)
+			}
 		}
 
 		// Timestamp

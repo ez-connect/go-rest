@@ -17,6 +17,7 @@ func GenerateSettings(packageName string) string {
 				Attributes: []Attribute{
 					{Name: "name", Type: "string"},
 					{Name: "price", Type: "float32"},
+					{Name: "enable", Type: "bool", AllowsEmpty: true},
 				},
 			},
 		},
