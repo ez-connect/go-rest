@@ -1,6 +1,8 @@
 package rest
 
 import (
+	"context"
+
 	"github.com/ez-connect/go-rest/db"
 	"github.com/ez-connect/go-rest/rest/filter"
 	"go.mongodb.org/mongo-driver/bson"
@@ -16,15 +18,15 @@ type RepositoryInterface interface {
 	EnsureIndexs()
 	Init(db db.DatabaseBase, collection string)
 	RegisterLifeCycle(l LifeCycle)
-	Find(params filter.Params, filter interface{}, option db.FindOption,
+	Find(params filter.Params, ctx context.Context, filter interface{}, option db.FindOption,
 		projection, docs interface{}) (error, int64)
-	FindOne(params filter.Params, filter, projection interface{}, doc interface{}) error
-	Aggregate(params filter.Params, pipeline, docs interface{}) (int64, error)
-	AggregateOne(params filter.Params, pipeline interface{}, doc interface{}) error
-	Head(params filter.Params, filter interface{}) int64
-	Insert(params filter.Params, doc interface{}, validateFunc func(interface{}) error) (interface{}, error)
-	UpdateOne(params filter.Params, filter, doc interface{}) (interface{}, error)
-	DeleteOne(params filter.Params, filter interface{}) (interface{}, error)
+	FindOne(params filter.Params, ctx context.Context, filter, projection interface{}, doc interface{}) error
+	Aggregate(params filter.Params, ctx context.Context, pipeline, docs interface{}) (int64, error)
+	AggregateOne(params filter.Params, ctx context.Context, pipeline interface{}, doc interface{}) error
+	Head(params filter.Params, ctx context.Context, filter interface{}) int64
+	Insert(params filter.Params, ctx context.Context, doc interface{}, validateFunc func(interface{}) error) (interface{}, error)
+	UpdateOne(params filter.Params, ctx context.Context, filter, doc interface{}) (interface{}, error)
+	DeleteOne(params filter.Params, ctx context.Context, filter interface{}) (interface{}, error)
 }
 
 func (r *RepositoryBase) EnsureIndexs() {}
@@ -39,7 +41,7 @@ func (r *RepositoryBase) RegisterLifeCycle(l LifeCycle) {
 	r.lifeCycle = l
 }
 
-func (r *RepositoryBase) Find(params filter.Params, filter interface{}, option db.FindOption,
+func (r *RepositoryBase) Find(params filter.Params, ctx context.Context, filter interface{}, option db.FindOption,
 	projection, docs interface{}) (error, int64) {
 
 	if r.lifeCycle.BeforeFind != nil {
@@ -48,7 +50,7 @@ func (r *RepositoryBase) Find(params filter.Params, filter interface{}, option d
 		}
 	}
 
-	err := r.Driver.Find(r.collection, filter, option, projection, docs)
+	err := r.Driver.Find(ctx, r.collection, filter, option, projection, docs)
 
 	if r.lifeCycle.AfterFind != nil {
 		if err := r.lifeCycle.AfterFind(params, docs); err != nil {
@@ -60,11 +62,11 @@ func (r *RepositoryBase) Find(params filter.Params, filter interface{}, option d
 		return err, 0
 	}
 
-	total, _ := r.Driver.Count(r.collection, filter)
+	total, _ := r.Driver.Count(ctx, r.collection, filter)
 	return nil, total
 }
 
-func (r *RepositoryBase) FindOne(params filter.Params, filter, projection interface{}, doc interface{}) error {
+func (r *RepositoryBase) FindOne(params filter.Params, ctx context.Context, filter, projection interface{}, doc interface{}) error {
 
 	if r.lifeCycle.BeforeFindOne != nil {
 		err := r.lifeCycle.BeforeFindOne(params, filter, projection)
@@ -73,7 +75,7 @@ func (r *RepositoryBase) FindOne(params filter.Params, filter, projection interf
 		}
 	}
 
-	if err := r.Driver.FindOne(r.collection, filter, projection, doc); err != nil {
+	if err := r.Driver.FindOne(ctx, r.collection, filter, projection, doc); err != nil {
 		return err
 	}
 
@@ -86,20 +88,20 @@ func (r *RepositoryBase) FindOne(params filter.Params, filter, projection interf
 	return nil
 }
 
-func (r *RepositoryBase) Aggregate(params filter.Params, pipeline, docs interface{}) (int64, error) {
+func (r *RepositoryBase) Aggregate(params filter.Params, ctx context.Context, pipeline, docs interface{}) (int64, error) {
 
-	err := r.Driver.Aggregate(r.collection, pipeline, docs)
+	err := r.Driver.Aggregate(ctx, r.collection, pipeline, docs)
 	if err != nil {
 		return 0, err
 	}
 
-	total, _ := r.Driver.Count(r.collection, bson.M{})
+	total, _ := r.Driver.Count(ctx, r.collection, bson.M{})
 	return total, nil
 }
 
-func (r *RepositoryBase) AggregateOne(params filter.Params, pipeline interface{}, doc interface{}) error {
+func (r *RepositoryBase) AggregateOne(params filter.Params, ctx context.Context, pipeline interface{}, doc interface{}) error {
 
-	err := r.Driver.AggregateOne(r.collection, pipeline, doc)
+	err := r.Driver.AggregateOne(ctx, r.collection, pipeline, doc)
 	if err != nil {
 		return err
 	}
@@ -108,12 +110,12 @@ func (r *RepositoryBase) AggregateOne(params filter.Params, pipeline interface{}
 }
 
 /// Find one document without body
-func (r *RepositoryBase) Head(params filter.Params, filter interface{}) int64 {
-	count, _ := r.Driver.Count(r.collection, filter)
+func (r *RepositoryBase) Head(params filter.Params, ctx context.Context, filter interface{}) int64 {
+	count, _ := r.Driver.Count(ctx, r.collection, filter)
 	return count
 }
 
-func (r *RepositoryBase) Insert(params filter.Params, doc interface{}, validateFunc func(interface{}) error) (interface{}, error) {
+func (r *RepositoryBase) Insert(params filter.Params, ctx context.Context, doc interface{}, validateFunc func(interface{}) error) (interface{}, error) {
 	if r.lifeCycle.BeforeInsert != nil {
 		if err := r.lifeCycle.BeforeInsert(params, doc); err != nil {
 			return nil, err
@@ -125,7 +127,7 @@ func (r *RepositoryBase) Insert(params filter.Params, doc interface{}, validateF
 		return nil, err
 	}
 
-	res, err := r.Driver.Insert(r.collection, doc)
+	res, err := r.Driver.Insert(ctx, r.collection, doc)
 	if err != nil {
 		return nil, err
 	}
@@ -139,14 +141,14 @@ func (r *RepositoryBase) Insert(params filter.Params, doc interface{}, validateF
 	return res, nil
 }
 
-func (r *RepositoryBase) UpdateOne(params filter.Params, filter, doc interface{}) (interface{}, error) {
+func (r *RepositoryBase) UpdateOne(params filter.Params, ctx context.Context, filter, doc interface{}) (interface{}, error) {
 	if r.lifeCycle.BeforeUpdateOne != nil {
 		if err := r.lifeCycle.BeforeUpdateOne(params, filter, doc); err != nil {
 			return nil, err
 		}
 	}
 
-	res, err := r.Driver.UpdateOne(r.collection, filter, bson.M{"$set": doc})
+	res, err := r.Driver.UpdateOne(ctx, r.collection, filter, bson.M{"$set": doc})
 	if err != nil {
 		return nil, err
 	}
@@ -160,14 +162,14 @@ func (r *RepositoryBase) UpdateOne(params filter.Params, filter, doc interface{}
 	return res, nil
 }
 
-func (r *RepositoryBase) DeleteOne(params filter.Params, filter interface{}) (interface{}, error) {
+func (r *RepositoryBase) DeleteOne(params filter.Params, ctx context.Context, filter interface{}) (interface{}, error) {
 	if r.lifeCycle.BeforeDeleteOne != nil {
 		if err := r.lifeCycle.BeforeDeleteOne(params, filter); err != nil {
 			return nil, err
 		}
 	}
 
-	res, err := r.Driver.DeleteOne(r.collection, filter)
+	res, err := r.Driver.DeleteOne(ctx, r.collection, filter)
 	if err != nil {
 		return nil, err
 	}

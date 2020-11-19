@@ -8,7 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func WithTransaction(callback func() (interface{}, error), opts ...*options.TransactionOptions) (interface{}, error) {
+func WithTransaction(callback func(sessCtx mongo.SessionContext) (interface{}, error), opts ...*options.TransactionOptions) (interface{}, error) {
 	ctx := context.Background()
 	session, err := GetMongoDb().GetClient().(*mongo.Client).StartSession()
 	if err != nil {
@@ -16,11 +16,7 @@ func WithTransaction(callback func() (interface{}, error), opts ...*options.Tran
 	}
 	defer session.EndSession(ctx)
 
-	sessCallback := func(sessCtx mongo.SessionContext) (interface{}, error) {
-		return callback()
-	}
-
-	result, err := session.WithTransaction(ctx, sessCallback, opts...)
+	result, err := session.WithTransaction(ctx, callback, opts...)
 	if err != nil {
 		panic(err)
 	}
