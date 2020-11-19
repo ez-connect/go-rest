@@ -60,8 +60,8 @@ func GenerateOpenAPI(config Config, format OpenAPIFormat) string {
 		for _, r := range g.Children {
 			re := regexp.MustCompile(`:(\w+)`)
 			endpoint := re.ReplaceAllString(fmt.Sprintf("%s%s", g.Path, r.Path), `{$1}`)
-			var path = paths[endpoint]
-			if &path == nil {
+			path, ok := paths[endpoint]
+			if !ok {
 				path = _Path{}
 			}
 
