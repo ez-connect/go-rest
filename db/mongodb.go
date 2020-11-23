@@ -23,6 +23,7 @@ type MongoDBConfig struct {
 	Password   string `yaml:"password"`
 	AuthSource string `yaml:"authSource"`
 	Name       string `yaml:"name"`
+	ReplicaSet string `yaml:"replicaSet"`
 }
 
 func (c *MongoDBConfig) IsValid() bool {
@@ -73,6 +74,10 @@ func (db *MongoDb) Connect() {
 		db.config.Host,
 		db.config.AuthSource,
 	)
+
+	if db.config.ReplicaSet != "" {
+		uri = fmt.Sprintf("%s&replicaSet=%s", uri, db.config.ReplicaSet)
+	}
 	clientOptions := options.Client().ApplyURI(uri)
 	client, err := mongo.NewClient(clientOptions)
 	if err != nil {
