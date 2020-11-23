@@ -39,7 +39,7 @@ func (h *HandlerBase) Find(c echo.Context, projection, docs interface{}) error {
 
 	o := filter.Option(params)
 
-	err, total := h.repo.Find(params, nil, f, o, projection, docs)
+	total, err := h.repo.Find(params, nil, f, o, projection, docs)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}

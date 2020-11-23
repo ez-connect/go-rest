@@ -19,7 +19,7 @@ type RepositoryInterface interface {
 	Init(db db.DatabaseBase, collection string)
 	RegisterLifeCycle(l LifeCycle)
 	Find(params filter.Params, ctx context.Context, filter interface{}, option db.FindOption,
-		projection, docs interface{}) (error, int64)
+		projection, docs interface{}) (int64, error)
 	FindOne(params filter.Params, ctx context.Context, filter, projection interface{}, doc interface{}) error
 	Aggregate(params filter.Params, ctx context.Context, pipeline, docs interface{}) (int64, error)
 	AggregateOne(params filter.Params, ctx context.Context, pipeline interface{}, doc interface{}) error
@@ -42,11 +42,11 @@ func (r *RepositoryBase) RegisterLifeCycle(l LifeCycle) {
 }
 
 func (r *RepositoryBase) Find(params filter.Params, ctx context.Context, filter interface{}, option db.FindOption,
-	projection, docs interface{}) (error, int64) {
+	projection, docs interface{}) (int64, error) {
 
 	if r.lifeCycle.BeforeFind != nil {
 		if err := r.lifeCycle.BeforeFind(params, &filter, &option, &projection); err != nil {
-			return err, 0
+			return 0, err
 		}
 	}
 
@@ -54,16 +54,16 @@ func (r *RepositoryBase) Find(params filter.Params, ctx context.Context, filter 
 
 	if r.lifeCycle.AfterFind != nil {
 		if err := r.lifeCycle.AfterFind(params, docs); err != nil {
-			return err, 0
+			return 0, err
 		}
 	}
 
 	if err != nil {
-		return err, 0
+		return 0, err
 	}
 
 	total, _ := r.Driver.Count(ctx, r.collection, filter)
-	return nil, total
+	return total, nil
 }
 
 func (r *RepositoryBase) FindOne(params filter.Params, ctx context.Context, filter, projection interface{}, doc interface{}) error {
