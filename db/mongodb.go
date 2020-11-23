@@ -223,6 +223,9 @@ func (db *MongoDb) Insert(ctx context.Context, collection string, doc interface{
 		ctx = context.TODO()
 	}
 	mres, err := db.getCollection(collection).InsertOne(ctx, doc)
+	if err != nil {
+		return InsertOneResult{}, err
+	}
 	res := InsertOneResult{Id: mres.InsertedID}
 	return res, err
 }
