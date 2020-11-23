@@ -23,6 +23,7 @@ type MongoDBConfig struct {
 	Password   string `yaml:"password"`
 	AuthSource string `yaml:"authSource"`
 	Name       string `yaml:"name"`
+	ReplicaSet string `yaml:"replicaSet"`
 }
 
 func (c *MongoDBConfig) IsValid() bool {
@@ -73,6 +74,10 @@ func (db *MongoDb) Connect() {
 		db.config.Host,
 		db.config.AuthSource,
 	)
+
+	if db.config.ReplicaSet != "" {
+		uri = fmt.Sprintf("%s&replicaSet=%s", uri, db.config.ReplicaSet)
+	}
 	clientOptions := options.Client().ApplyURI(uri)
 	client, err := mongo.NewClient(clientOptions)
 	if err != nil {
@@ -98,11 +103,14 @@ func (db *MongoDb) GetClient() interface{} {
 	return db.session
 }
 
-func (db *MongoDb) GetCursor(collection string,
+func (db *MongoDb) GetCursor(ctx context.Context, collection string,
 	filter, sort interface{},
 	skip, limit int64,
 	projection interface{}) (interface{}, error) {
 
+	if ctx == nil {
+		ctx = context.TODO()
+	}
 	opts := options.Find()
 	if sort != nil {
 		opts.SetSort(sort)
@@ -118,12 +126,16 @@ func (db *MongoDb) GetCursor(collection string,
 		opts.SetProjection(projection)
 	}
 
-	return db.getCollection(collection).Find(context.TODO(), filter, opts)
+	return db.getCollection(collection).Find(ctx, filter, opts)
 }
 
-func (db *MongoDb) Find(collection string,
+func (db *MongoDb) Find(ctx context.Context, collection string,
 	filter interface{}, option FindOption,
 	projection, docs interface{}) error {
+
+	if ctx == nil {
+		ctx = context.TODO()
+	}
 
 	var sort bson.M
 	if option.Sort != "" {
@@ -135,6 +147,7 @@ func (db *MongoDb) Find(collection string,
 	}
 
 	res, err := db.GetCursor(
+		ctx,
 		collection,
 		filter,
 		sort,
@@ -147,13 +160,17 @@ func (db *MongoDb) Find(collection string,
 	}
 
 	cur := res.(*mongo.Cursor) // it a cursor
-	defer cur.Close(context.TODO())
-	return cur.All(context.TODO(), docs)
+	defer cur.Close(ctx)
+	return cur.All(ctx, docs)
 }
 
-func (db *MongoDb) Distinct(collection, fieldName string,
+func (db *MongoDb) Distinct(ctx context.Context, collection, fieldName string,
 	filter interface{}) ([]string, error) {
-	res, err := db.getCollection(collection).Distinct(context.TODO(), fieldName, filter)
+
+	if ctx == nil {
+		ctx = context.TODO()
+	}
+	res, err := db.getCollection(collection).Distinct(ctx, fieldName, filter)
 	values := make([]string, len(res))
 	for i := range res {
 		values[i] = res[i].(string)
@@ -161,55 +178,80 @@ func (db *MongoDb) Distinct(collection, fieldName string,
 	return values, err
 }
 
-func (db *MongoDb) Aggregate(collection string, pipeline interface{},
+func (db *MongoDb) Aggregate(ctx context.Context, collection string, pipeline interface{},
 	docs interface{}) error {
-	cur, err := db.getCollection(collection).Aggregate(context.TODO(), pipeline)
+
+	if ctx == nil {
+		ctx = context.TODO()
+	}
+	cur, err := db.getCollection(collection).Aggregate(ctx, pipeline)
 	if err == nil {
-		defer cur.Close(context.TODO())
-		return cur.All(context.TODO(), docs)
+		defer cur.Close(ctx)
+		return cur.All(ctx, docs)
 	}
 	return err
 }
 
-func (db *MongoDb) FindOne(collection string, filter interface{},
+func (db *MongoDb) FindOne(ctx context.Context, collection string, filter interface{},
 	projection interface{}, doc interface{}) error {
+	if ctx == nil {
+		ctx = context.TODO()
+	}
 	opts := options.FindOne()
 	if projection != nil {
 		opts.SetProjection(projection)
 	}
-	res := db.getCollection(collection).FindOne(context.TODO(), filter, opts)
+	res := db.getCollection(collection).FindOne(ctx, filter, opts)
 	return res.Decode(doc)
 }
 
-func (db *MongoDb) AggregateOne(collection string, pipeline interface{},
+func (db *MongoDb) AggregateOne(ctx context.Context, collection string, pipeline interface{},
 	doc interface{}) error {
-	cur, err := db.getCollection(collection).Aggregate(context.TODO(), pipeline)
+	if ctx == nil {
+		ctx = context.TODO()
+	}
+	cur, err := db.getCollection(collection).Aggregate(ctx, pipeline)
 	if err != nil {
 		return err
 	}
 
-	defer cur.Close(context.TODO())
-	if cur.Next(context.TODO()) {
+	defer cur.Close(ctx)
+	if cur.Next(ctx) {
 		return cur.Decode(doc)
 	}
 
 	return nil
 }
 
-func (db *MongoDb) Insert(collection string, doc interface{}) (InsertOneResult, error) {
-	mres, err := db.getCollection(collection).InsertOne(context.TODO(), doc)
+func (db *MongoDb) Insert(ctx context.Context, collection string, doc interface{}) (InsertOneResult, error) {
+	if ctx == nil {
+		ctx = context.TODO()
+	}
+	mres, err := db.getCollection(collection).InsertOne(ctx, doc)
+	if err != nil {
+		return InsertOneResult{}, err
+	}
 	res := InsertOneResult{Id: mres.InsertedID}
 	return res, err
 }
 
-func (db *MongoDb) InsertMany(collection string, docs []interface{}) ([]interface{}, error) {
-	res, err := db.getCollection(collection).InsertMany(context.TODO(), docs)
+func (db *MongoDb) InsertMany(ctx context.Context, collection string, docs []interface{}) ([]interface{}, error) {
+	if ctx == nil {
+		ctx = context.TODO()
+	}
+	res, err := db.getCollection(collection).InsertMany(ctx, docs)
+	if err != nil {
+		return nil, err
+	}
 	return res.InsertedIDs, err
 }
 
-func (db *MongoDb) UpdateOne(collection string, filter interface{},
+func (db *MongoDb) UpdateOne(ctx context.Context, collection string, filter interface{},
 	update interface{}) (UpdateOneResult, error) {
-	_, err := db.getCollection(collection).UpdateOne(context.TODO(), filter, update)
+	if ctx == nil {
+		ctx = context.TODO()
+	}
+	_, err := db.getCollection(collection).UpdateOne(ctx, filter, update)
 	var id interface{}
 	f, ok := filter.(primitive.M)
 	if ok {
@@ -219,42 +261,60 @@ func (db *MongoDb) UpdateOne(collection string, filter interface{},
 	return res, err
 }
 
-func (db *MongoDb) FindOneAndUpdate(collection string, filter interface{},
+func (db *MongoDb) FindOneAndUpdate(ctx context.Context, collection string, filter interface{},
 	update, doc interface{}) error {
+	if ctx == nil {
+		ctx = context.TODO()
+	}
 	opt := options.After
-	res := db.getCollection(collection).FindOneAndUpdate(context.TODO(), filter, update,
+	res := db.getCollection(collection).FindOneAndUpdate(ctx, filter, update,
 		&options.FindOneAndUpdateOptions{ReturnDocument: &opt},
 	)
 	return res.Decode(doc)
 }
 
-func (db *MongoDb) UpdateMany(collection string, filter interface{},
+func (db *MongoDb) UpdateMany(ctx context.Context, collection string, filter interface{},
 	update interface{}) (interface{}, error) {
-	return db.getCollection(collection).UpdateMany(context.TODO(), filter, update)
-}
-
-func (db *MongoDb) DeleteOne(collection string, filter interface{}) (interface{}, error) {
-	return db.getCollection(collection).DeleteOne(context.TODO(), filter)
-}
-
-func (db *MongoDb) DeleteMany(collection string, filter interface{}) (interface{}, error) {
-	return db.getCollection(collection).DeleteMany(context.TODO(), filter)
-}
-
-func (db *MongoDb) Count(collection string, filter interface{}) (int64, error) {
-	if cmp.Equal(filter, bson.M{}) {
-		return db.getCollection(collection).EstimatedDocumentCount(context.TODO())
+	if ctx == nil {
+		ctx = context.TODO()
 	}
-	return db.getCollection(collection).CountDocuments(context.TODO(), filter)
+	return db.getCollection(collection).UpdateMany(ctx, filter, update)
 }
 
-func (db *MongoDb) EnsureIndex(collection string, name string, keys bson.M,
+func (db *MongoDb) DeleteOne(ctx context.Context, collection string, filter interface{}) (interface{}, error) {
+	if ctx == nil {
+		ctx = context.TODO()
+	}
+	return db.getCollection(collection).DeleteOne(ctx, filter)
+}
+
+func (db *MongoDb) DeleteMany(ctx context.Context, collection string, filter interface{}) (interface{}, error) {
+	if ctx == nil {
+		ctx = context.TODO()
+	}
+	return db.getCollection(collection).DeleteMany(ctx, filter)
+}
+
+func (db *MongoDb) Count(ctx context.Context, collection string, filter interface{}) (int64, error) {
+	if ctx == nil {
+		ctx = context.TODO()
+	}
+	if cmp.Equal(filter, bson.M{}) {
+		return db.getCollection(collection).EstimatedDocumentCount(ctx)
+	}
+	return db.getCollection(collection).CountDocuments(ctx, filter)
+}
+
+func (db *MongoDb) EnsureIndex(ctx context.Context, collection string, name string, keys bson.M,
 	unique bool) string {
+	if ctx == nil {
+		ctx = context.TODO()
+	}
 	index := mongo.IndexModel{
 		Keys:    keys,
 		Options: options.Index().SetName(name).SetBackground(true).SetUnique(unique),
 	}
-	name, err := db.getCollection(collection).Indexes().CreateOne(context.TODO(), index)
+	name, err := db.getCollection(collection).Indexes().CreateOne(ctx, index)
 	if err != nil {
 		fmt.Println("EnsureIndex:", collection, ":", name)
 		fmt.Println(err)
