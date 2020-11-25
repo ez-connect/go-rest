@@ -7,7 +7,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/ez-connect/go-rest/cli/go-rest-gen/gen"
+	"github.com/ez-connect/go-rest/cmd/go-rest-gen/gen"
 	"github.com/ez-connect/go-rest/core"
 )
 
