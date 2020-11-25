@@ -56,7 +56,7 @@ func main() {
 
 		// Check for settings exists
 		if _, err := os.Stat(filename); os.IsNotExist(err) {
-			fmt.Println(fmt.Sprintf("No %s file found", gen.Settings))
+			fmt.Println("No", gen.Settings, "file found")
 			continue
 		}
 
