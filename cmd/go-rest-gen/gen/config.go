@@ -10,6 +10,8 @@ type Import struct {
 	Router     []string `yaml:"router,omitempty"`
 }
 
+///////////////////////////////////////////////////////////////////
+
 type Attribute struct {
 	Name        string `yaml:"name"`
 	Type        string `yaml:"type"`
@@ -24,6 +26,8 @@ type ModelConfig struct {
 	// All attributes
 	Attributes []Attribute `yaml:"attributes"`
 }
+
+///////////////////////////////////////////////////////////////////
 
 // Single index
 type SingleIndex struct {
@@ -54,19 +58,39 @@ type Index struct {
 	Texts     []string        `yaml:"texts,omitempty"`
 }
 
+///////////////////////////////////////////////////////////////////
+
+type ParameterIn string
+
+const (
+	ParameterInPath  ParameterIn = "path"
+	ParameterInQuery ParameterIn = "query"
+	ParameterInBody  ParameterIn = "body"
+)
+
+type RouteParameter struct {
+	Name     string
+	In       ParameterIn
+	Type     string
+	Required bool `yaml:"required,omitempty"`
+}
+
+type RouteConfig struct {
+	Method     string
+	Path       string
+	Parameters []RouteParameter
+	Handler    string
+
+	// Permission / Policies here
+}
+
 type RouteGroup struct {
 	Path           string
 	MiddlewareFunc string
 	Children       []RouteConfig
 }
 
-type RouteConfig struct {
-	Method  string
-	Path    string
-	Handler string
-
-	// Permission / Policies here
-}
+///////////////////////////////////////////////////////////////////
 
 type Config struct {
 	Import     Import        `yaml:"import"`

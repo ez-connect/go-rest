@@ -7,7 +7,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/ez-connect/go-rest/cli/go-rest-gen/gen"
+	"github.com/ez-connect/go-rest/cmd/go-rest-gen/gen"
 	"github.com/ez-connect/go-rest/core"
 )
 
@@ -56,7 +56,7 @@ func main() {
 
 		// Check for settings exists
 		if _, err := os.Stat(filename); os.IsNotExist(err) {
-			fmt.Println(fmt.Sprintf("No %s file found", gen.Settings))
+			fmt.Println("No", gen.Settings, "file found")
 			continue
 		}
 
