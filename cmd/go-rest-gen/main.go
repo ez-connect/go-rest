@@ -44,6 +44,7 @@ func main() {
 		log.Fatal(err)
 	}
 
+	configs := []gen.Config{}
 	var openAPI string
 	for _, dir := range dirs {
 		if !dir.IsDir() {
@@ -67,6 +68,8 @@ func main() {
 			log.Fatal(err)
 		}
 
+		configs = append(configs, config)
+
 		// Create folder if not exists
 		err = os.MkdirAll(fmt.Sprintf("%s/generated/%s", workingDir, dir.Name()), os.ModeDir)
 		if err != nil {
@@ -82,6 +85,9 @@ func main() {
 		// Open API
 		openAPI = gen.GenerateOpenAPI(config, gen.YML)
 	}
+
+	// Write constants
+	gen.WriteConstants(workingDir, configs)
 
 	// Write Open API
 	f, err := os.Create(fmt.Sprintf("%s/generated/openapi.yml", workingDir))

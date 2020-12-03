@@ -5,13 +5,16 @@ import (
 	"strings"
 )
 
-func GenerateConstant(packageName string, collections []string) string {
+func GenerateConstants(configs []Config) string {
 	buf := []string{}
-	buf = append(buf, fmt.Sprintf("package %s\n", packageName))
+	buf = append(buf, "package generated\n")
+	buf = append(buf, "const (")
 
-	for _, v := range collections {
-		buf = append(buf, fmt.Sprintf("const Collection%s = %s", v, v))
+	for _, v := range configs {
+		buf = append(buf, fmt.Sprintf("\tCollection%s = %s", strings.Title(v.Collection), v.Collection))
 	}
+
+	buf = append(buf, ")")
 
 	return strings.Join(buf, "\n")
 }

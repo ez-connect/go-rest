@@ -34,6 +34,7 @@ func WriteSource(workingDir, packageName string, fileType FileType, config Confi
 
 	filename := fmt.Sprintf("%s/generated/%s/%s", workingDir, packageName, fileType)
 	fmt.Println(filename)
+
 	f, err := os.Create(filename)
 	if err != nil {
 		log.Fatal(err)
@@ -66,6 +67,7 @@ func WriteService(workingDir, packageName string, fileType FileType) {
 
 	filename := fmt.Sprintf("%s/services/%s/%s", workingDir, packageName, fileType)
 	fmt.Println(filename)
+
 	f, err := os.Create(filename)
 	if err != nil {
 		log.Fatal(err)
@@ -74,6 +76,23 @@ func WriteService(workingDir, packageName string, fileType FileType) {
 	defer f.Close()
 
 	_, err = f.WriteString(v)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func WriteConstants(workingDir string, configs []Config) {
+	filename := fmt.Sprintf("%s/generated/constants.go", workingDir)
+	fmt.Println(filename)
+
+	f, err := os.Create(filename)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer f.Close()
+
+	_, err = f.WriteString(GenerateConstants(configs))
 	if err != nil {
 		log.Fatal(err)
 	}
