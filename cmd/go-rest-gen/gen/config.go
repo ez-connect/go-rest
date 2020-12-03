@@ -76,8 +76,8 @@ type RouteParameter struct {
 }
 
 type RouteConfig struct {
-	Method     string
 	Path       string
+	Method     string
 	Parameters []RouteParameter
 	Handler    string
 
