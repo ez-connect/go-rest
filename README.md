@@ -16,7 +16,7 @@ go get github.com/ez-connect/go-rest
 Install the binary
 
 ```bash
-go install github.com/ez-connect/go-rest/cmd/go-rest-gen
+go install github.com/ez-connect/go-rest/cmd/go-server
 ```
 
 ### API Documentation
