@@ -11,10 +11,10 @@ func GenerateConstants(configs []Config) string {
 	buf = append(buf, "const (")
 
 	for _, v := range configs {
-		buf = append(buf, fmt.Sprintf("\tCollection%s = %s", strings.Title(v.Collection), v.Collection))
+		buf = append(buf, fmt.Sprintf("\tCollection%s = \"%s\"", strings.Title(v.Collection), v.Collection))
 	}
 
-	buf = append(buf, ")")
+	buf = append(buf, ")\n")
 
 	return strings.Join(buf, "\n")
 }
