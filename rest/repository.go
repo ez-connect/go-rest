@@ -123,8 +123,10 @@ func (r *RepositoryBase) Insert(params filter.Params, ctx context.Context, doc i
 	}
 
 	// Vaildate on insert only
-	if err := validateFunc(doc); err != nil {
-		return nil, err
+	if validateFunc != nil {
+		if err := validateFunc(doc); err != nil {
+			return nil, err
+		}
 	}
 
 	res, err := r.Driver.Insert(ctx, r.collection, doc)
