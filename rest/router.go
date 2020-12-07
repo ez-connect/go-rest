@@ -7,4 +7,5 @@ import (
 
 type RouterBase interface {
 	Init(e *echo.Echo, db db.DatabaseBase)
+	GetRepository() RepositoryInterface
 }
