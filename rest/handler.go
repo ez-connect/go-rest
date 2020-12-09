@@ -128,7 +128,7 @@ func (h *HandlerBase) UpdateOne(c echo.Context, doc interface{}) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	res, err := h.repo.UpdateOne(params, nil, f, doc)
+	res, err := h.repo.UpdateOne(params, nil, f, doc, c.Validate)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}

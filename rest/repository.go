@@ -25,7 +25,7 @@ type RepositoryInterface interface {
 	AggregateOne(params filter.Params, ctx context.Context, pipeline interface{}, doc interface{}) error
 	Head(params filter.Params, ctx context.Context, filter interface{}) int64
 	Insert(params filter.Params, ctx context.Context, doc interface{}, validateFunc func(interface{}) error) (interface{}, error)
-	UpdateOne(params filter.Params, ctx context.Context, filter, doc interface{}) (interface{}, error)
+	UpdateOne(params filter.Params, ctx context.Context, filter, doc interface{}, validateFunc func(interface{}) error) (interface{}, error)
 	DeleteOne(params filter.Params, ctx context.Context, filter interface{}) (interface{}, error)
 }
 
@@ -122,7 +122,7 @@ func (r *RepositoryBase) Insert(params filter.Params, ctx context.Context, doc i
 		}
 	}
 
-	// Vaildate on insert only
+	// Vaildate
 	if validateFunc != nil {
 		if err := validateFunc(doc); err != nil {
 			return nil, err
@@ -143,9 +143,16 @@ func (r *RepositoryBase) Insert(params filter.Params, ctx context.Context, doc i
 	return res, nil
 }
 
-func (r *RepositoryBase) UpdateOne(params filter.Params, ctx context.Context, filter, doc interface{}) (interface{}, error) {
+func (r *RepositoryBase) UpdateOne(params filter.Params, ctx context.Context, filter, doc interface{}, validateFunc func(interface{}) error) (interface{}, error) {
 	if r.lifeCycle.BeforeUpdateOne != nil {
 		if err := r.lifeCycle.BeforeUpdateOne(params, filter, doc); err != nil {
+			return nil, err
+		}
+	}
+
+	// Vaildate
+	if validateFunc != nil {
+		if err := validateFunc(doc); err != nil {
 			return nil, err
 		}
 	}

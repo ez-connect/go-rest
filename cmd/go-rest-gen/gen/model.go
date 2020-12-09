@@ -34,8 +34,8 @@ func GenerateModel(packageName string, config Config) string {
 
 		for _, attr := range v.Attributes {
 			var validate = ""
-			if attr.Required {
-				validate = " validate:\"required\""
+			if attr.Validate != "" {
+				validate = fmt.Sprintf(" validate:\"%s\"", attr.Validate)
 			}
 
 			if !attr.AllowsEmpty {

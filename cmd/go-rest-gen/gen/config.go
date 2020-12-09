@@ -15,7 +15,7 @@ type Import struct {
 type Attribute struct {
 	Name        string `yaml:"name"`
 	Type        string `yaml:"type"`
-	Required    bool   `yaml:"required,omitempty"`
+	Validate    string `yaml:"validate,omitempty"`
 	AllowsEmpty bool   `yaml:"allowsEmpty,omitempty"`
 }
 
