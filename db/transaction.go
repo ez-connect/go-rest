@@ -18,7 +18,7 @@ func WithTransaction(callback func(sessCtx mongo.SessionContext) (interface{}, e
 
 	result, err := session.WithTransaction(ctx, callback, opts...)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	fmt.Printf("result: %v\n", result)
 	return result, nil
