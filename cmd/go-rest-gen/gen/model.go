@@ -74,7 +74,7 @@ func GenerateModelService(packageName string) string {
 	buf = append(buf, "import (")
 	buf = append(buf, fmt.Sprintf("\t\"app/generated/%s\"", packageName))
 	buf = append(buf, ")\n")
-	buf = append(buf, "type Model = %s.Model", packageName)
+	buf = append(buf, fmt.Sprintf("type Model = %s.Model", packageName))
 
 	return strings.Join(buf, "\n")
 }
