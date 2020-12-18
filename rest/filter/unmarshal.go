@@ -44,6 +44,7 @@ var (
 		"$nin": {Array, Value},
 
 		"$exists": {Bool},
+		"$size":   {Value},
 
 		"$all":       {Array, Value},
 		"$elemMatch": {Map},
@@ -181,7 +182,8 @@ func validateMap(v map[string]interface{}, rv reflect.Value, mustBeObjectId bool
 			if valueType != Value && valueType != Any {
 				return nil, fmt.Errorf("Value of \"%s\" is must be %s", key, valueType.String())
 			}
-			if isObjectId {
+			// some special case: value can be null or check size of array
+			if isObjectId && value != nil && key != "$size" {
 				return nil, fmt.Errorf("\"%s\" must be objectid string", key)
 			} else {
 				result[key] = value
