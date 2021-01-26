@@ -100,7 +100,11 @@ func (db *MongoDb) Close() {
 
 // Returns the current session, *mongo.Client
 func (db *MongoDb) GetClient() interface{} {
-	return db.session
+	return db.session.Database(db.config.Name).Client()
+}
+
+func (db *MongoDb) GetCollection(collection string) interface{} {
+	return db.getCollection(collection)
 }
 
 func (db *MongoDb) GetCursor(ctx context.Context, collection string,

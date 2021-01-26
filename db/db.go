@@ -11,6 +11,7 @@ type DatabaseBase interface {
 	Connect()
 	Close()
 	GetClient() interface{}
+	GetCollection(collection string) interface{}
 	GetCursor(ctx context.Context, collection string,
 		filter, sort interface{}, skip, limit int64,
 		projection interface{}) (interface{}, error)
