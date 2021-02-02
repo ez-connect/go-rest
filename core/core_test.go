@@ -29,3 +29,12 @@ func TestSendEmail(t *testing.T) {
 
 	// assert.NoError(t, smtp.Send("thanh.vinh@hotmail.com", "thanh.vinh@hotmail.com", "Hi", "You"))
 }
+
+func TestEmitter(t *testing.T) {
+	e := Emitter{}
+	e.Init()
+	e.On("test", func() {})
+	assert.Equal(t, true, e.Has("test"))
+	e.Emit("test")
+	e.Clear()
+}
