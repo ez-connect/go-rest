@@ -41,7 +41,7 @@ func (h *HandlerBase) Find(c echo.Context, projection, docs interface{}) error {
 
 	total, err := h.repo.Find(params, nil, f, o, projection, docs)
 	if err != nil {
-		return returnError(c, err)
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	c.Response().Header().Set(HeaderTotalCount, strconv.Itoa(int(total)))
@@ -57,7 +57,7 @@ func (h *HandlerBase) FindOne(c echo.Context, projection interface{}, doc interf
 	}
 
 	if err := h.repo.FindOne(params, nil, f, projection, doc); err != nil {
-		return returnError(c, err)
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, doc)
@@ -73,7 +73,7 @@ func (h *HandlerBase) Aggregate(c echo.Context,
 		return c.JSON(http.StatusOK, docs)
 	}
 
-	return returnError(c, err)
+	return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 }
 
 func (h *HandlerBase) AggregateOne(c echo.Context,
@@ -85,7 +85,7 @@ func (h *HandlerBase) AggregateOne(c echo.Context,
 		return c.JSON(http.StatusOK, doc)
 	}
 
-	return returnError(c, err)
+	return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 }
 
 /// Find one document without body
@@ -110,7 +110,7 @@ func (h *HandlerBase) Insert(c echo.Context, doc interface{}) error {
 	params := filter.GetRawParams(c)
 	res, err := h.repo.Insert(params, nil, doc, c.Validate)
 	if err != nil {
-		return returnError(c, err)
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	return c.JSON(http.StatusCreated, res)
@@ -130,7 +130,7 @@ func (h *HandlerBase) UpdateOne(c echo.Context, doc interface{}) error {
 
 	res, err := h.repo.UpdateOne(params, nil, f, doc, c.Validate)
 	if err != nil {
-		return returnError(c, err)
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, res)
@@ -146,14 +146,7 @@ func (h *HandlerBase) DeleteOne(c echo.Context, doc interface{}) error {
 
 	res, err := h.repo.DeleteOne(params, nil, f)
 	if err != nil {
-		return returnError(c, err)
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	return c.JSON(http.StatusOK, res)
-}
-
-func returnError(c echo.Context, err error) error {
-	if _, ok := err.(rerror); ok {
-		return echo.NewHTTPError(err.(rerror).Code(), err.Error())
-	}
-	return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 }
