@@ -71,7 +71,7 @@ func main() {
 		configs = append(configs, config)
 
 		// Create folder if not exists
-		err = os.MkdirAll(fmt.Sprintf("%s/generated/%s", workingDir, dir.Name()), os.ModeDir)
+		err = os.MkdirAll(fmt.Sprintf("%s/generated/%s", workingDir, dir.Name()), 0777)
 		if err != nil {
 			log.Fatal(err)
 		}
