@@ -23,7 +23,7 @@ func main() {
 	service := *new
 	fmt.Println(service)
 	if service != "" {
-		err := os.MkdirAll(fmt.Sprintf("%s/services/%s", workingDir, service), os.ModeDir)
+		err := os.MkdirAll(fmt.Sprintf("%s/services/%s", workingDir, service), 0777)
 		if err != nil {
 			log.Fatal(err)
 		}
