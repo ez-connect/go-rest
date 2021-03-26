@@ -10,6 +10,11 @@ func (r *Router) Init(e *echo.Echo, db db.DatabaseBase) {
 	r.Router.Init(e, &r.Handler.Handler)
 	r.Handler.Init(db, %s.CollectionName, &r.Repo.Repository)
 }
+
+// Implement rest.RouterBase
+// func (r *Router) GetRepository() rest.RepositoryInterface {
+// 	return &r.Repo
+// }
 `
 
 func GenerateRoutes(packageName string, config Config) string {
@@ -17,9 +22,11 @@ func GenerateRoutes(packageName string, config Config) string {
 	buf = append(buf, fmt.Sprintf("package %s\n", packageName))
 
 	buf = append(buf, "import (")
+	buf = append(buf, "\t\"github.com/ez-connect/go-rest/rest\"")
 	buf = append(buf, "\t\"github.com/labstack/echo/v4\"\n")
 
 	// buf = append(buf, fmt.Sprintf("\t\"app/services/%s\"", packageName))
+	buf = append(buf, "\t// Imports from configs.yml")
 	for _, v := range config.Import.Router {
 		buf = append(buf, fmt.Sprintf("\t\"%s\"", v))
 	}
@@ -27,6 +34,7 @@ func GenerateRoutes(packageName string, config Config) string {
 	buf = append(buf, ")\n")
 
 	buf = append(buf, "type Router struct {")
+	buf = append(buf, "\trest.RouterBase")
 	buf = append(buf, "}\n")
 
 	buf = append(buf, "func (r *Router) Init(e *echo.Echo, h *Handler) {")
@@ -53,9 +61,9 @@ func GenerateRoutesService(packageName string) string {
 	buf = append(buf, fmt.Sprintf("package %s\n", packageName))
 
 	buf = append(buf, "import (")
-	buf = append(buf, fmt.Sprintf("\t\"app/generated/%s\"\n", packageName))
 	buf = append(buf, "\t\"github.com/ez-connect/go-rest/db\"")
-	buf = append(buf, "\t\"github.com/labstack/echo/v4\"")
+	buf = append(buf, "\t\"github.com/labstack/echo/v4\"\n")
+	buf = append(buf, fmt.Sprintf("\t\"app/generated/%s\"", packageName))
 	buf = append(buf, ")\n")
 
 	buf = append(buf, "type Router struct {")
