@@ -90,29 +90,33 @@ func ParseToken(tokenString string) (*jwt.Token, error) {
 type MiddlewareHandler func(next echo.HandlerFunc, c echo.Context) error
 
 // Extracts token from the request header.
-func GetJWTFromHeader(c echo.Context) *string {
+func GetJWTFromHeader(c echo.Context) (string, error) {
 	header := c.Request().Header.Get(echo.HeaderAuthorization)
+	if header == "" {
+		return "", nil
+	}
 	authScheme := middleware.DefaultJWTConfig.AuthScheme
 	l := len(authScheme)
 	if len(header) > l+1 && header[:l] == authScheme {
-		token := header[l+1:]
-		return &token
+		return header[l+1:], nil
 	}
-	return nil
+	return "", middleware.ErrJWTMissing
 }
 
 func JWTWithAuthHandler(handler MiddlewareHandler) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			auth := GetJWTFromHeader(c)
-			if auth == nil {
+			auth, err := GetJWTFromHeader(c)
+			if err != nil {
+				return err
+			} else if auth == "" {
 				return handler(next, c)
 			}
 
 			/// https://github.com/labstack/echo/blob/master/middleware/jwt.go#L192
 			token := new(jwt.Token)
 			// Issue #647, #656
-			token, err := jwt.Parse(*auth, jwtKeyFunc)
+			token, err = jwt.Parse(auth, jwtKeyFunc)
 			if err == nil && token.Valid {
 				// Store user information from token into context.
 				c.Set(middleware.DefaultJWTConfig.ContextKey, token)
