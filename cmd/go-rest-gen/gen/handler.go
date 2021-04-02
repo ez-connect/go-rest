@@ -52,38 +52,34 @@ func GenerateHandler(packageName string, config Config) string {
 	buf = append(buf, fmt.Sprintf("package %s\n", packageName))
 
 	buf = append(buf, "import (")
-	buf = append(buf, "\t\"github.com/ez-connect/go-rest/db\"")
-	buf = append(buf, "\t\"github.com/ez-connect/go-rest/core\"")
-	buf = append(buf, "\t\"github.com/ez-connect/go-rest/rest\"")
 	buf = append(buf, "\t\"github.com/labstack/echo/v4\"\n")
-
-	// buf = append(buf, fmt.Sprintf("\t\"app/services/%s\"", packageName))
-	for _, v := range config.Import.Handler {
-		buf = append(buf, fmt.Sprintf("\t\"%s\"", v))
-	}
-
 	buf = append(buf, ")\n")
 
-	buf = append(buf, "type Handler struct {")
+	buf = append(buf, "type IHandler interface {")
 	// buf = append(buf, fmt.Sprintf("\t%s.Handler", packageName))
-	buf = append(buf, "\trest.HandlerBase")
+	// buf = append(buf, "\trest.HandlerBase")
+	for _, r := range config.Routes {
+		for _, c := range r.Children {
+			buf = append(buf, fmt.Sprintf(`	%s(c echo.Context) error`, c.Handler))
+		}
+	}
 	buf = append(buf, "}\n")
 
 	buf = append(buf, "///////////////////////////////////////////////////////////////////\n")
 
-	if config.LifeCycle != "" {
-		buf = append(buf, fmt.Sprintf(initHandler, fmt.Sprintf("r.RegisterLifeCycle(%s)", config.LifeCycle)))
-	} else {
-		buf = append(buf, fmt.Sprintf(initHandler, ""))
-	}
+	// if config.LifeCycle != "" {
+	// 	buf = append(buf, fmt.Sprintf(initHandler, fmt.Sprintf("r.RegisterLifeCycle(%s)", config.LifeCycle)))
+	// } else {
+	// 	buf = append(buf, fmt.Sprintf(initHandler, ""))
+	// }
 
 	// Generate all, although some handlers will not be used
 	// to ignore linting error of imported and not used
-	buf = append(buf, fmt.Sprintf(find, strings.Title(packageName)))
-	buf = append(buf, fmt.Sprintf(insert, strings.Title(packageName)))
-	buf = append(buf, fmt.Sprintf(findOne, strings.Title(packageName)))
-	buf = append(buf, fmt.Sprintf(update, strings.Title(packageName)))
-	buf = append(buf, fmt.Sprintf(delete, strings.Title(packageName)))
+	// buf = append(buf, fmt.Sprintf(find, strings.Title(packageName)))
+	// buf = append(buf, fmt.Sprintf(insert, strings.Title(packageName)))
+	// buf = append(buf, fmt.Sprintf(findOne, strings.Title(packageName)))
+	// buf = append(buf, fmt.Sprintf(update, strings.Title(packageName)))
+	// buf = append(buf, fmt.Sprintf(delete, strings.Title(packageName)))
 
 	return strings.Join(buf, "\n")
 }

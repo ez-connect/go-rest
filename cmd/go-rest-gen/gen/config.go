@@ -76,10 +76,11 @@ type RouteParameter struct {
 }
 
 type RouteConfig struct {
-	Path       string
-	Method     string
-	Parameters []RouteParameter
-	Handler    string
+	Path           string
+	Method         string
+	Parameters     []RouteParameter
+	Handler        string
+	MiddlewareFunc string
 
 	// Permission / Policies here
 }

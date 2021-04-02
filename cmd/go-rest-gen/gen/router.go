@@ -37,7 +37,7 @@ func GenerateRoutes(packageName string, config Config) string {
 	buf = append(buf, "\trest.RouterBase")
 	buf = append(buf, "}\n")
 
-	buf = append(buf, "func (r *Router) Init(e *echo.Echo, h *Handler) {")
+	buf = append(buf, "func (r *Router) Init(e *echo.Echo, h IHandler) {")
 
 	for i, v := range config.Routes {
 		buf = append(buf, fmt.Sprintf("\tg%v := e.Group(\"%s\")", i, v.Path))
@@ -45,9 +45,15 @@ func GenerateRoutes(packageName string, config Config) string {
 			buf = append(buf, fmt.Sprintf("\tg%v.Use(rest.JWTWithAuthHandler(%s))", i, v.MiddlewareFunc))
 		}
 		for _, r := range v.Children {
-			buf = append(buf,
-				fmt.Sprintf("\tg%v.%s(\"%s\", h.%s)", i, r.Method, r.Path, r.Handler),
-			)
+			if r.MiddlewareFunc == "" {
+				buf = append(buf,
+					fmt.Sprintf("\tg%v.%s(\"%s\", h.%s)", i, r.Method, r.Path, r.Handler),
+				)
+			} else {
+				buf = append(buf,
+					fmt.Sprintf("\tg%v.%s(\"%s\", h.%s, %s)", i, r.Method, r.Path, r.Handler, r.MiddlewareFunc),
+				)
+			}
 		}
 	}
 

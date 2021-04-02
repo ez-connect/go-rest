@@ -34,6 +34,7 @@ func (r *RepositoryBase) EnsureIndexs() {}
 func (r *RepositoryBase) Init(db db.DatabaseBase, collection string) {
 	r.Driver = db
 	r.collection = collection
+	r.EnsureIndexs()
 	// h.lifeCycle = interface{}(h).(LifeCycle)
 }
 

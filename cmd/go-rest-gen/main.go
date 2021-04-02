@@ -78,9 +78,9 @@ func main() {
 
 		// Generate source
 		gen.WriteSource(workingDir, dir.Name(), gen.Model, config)
-		gen.WriteSource(workingDir, dir.Name(), gen.Repository, config)
-		gen.WriteSource(workingDir, dir.Name(), gen.Handler, config)
 		gen.WriteSource(workingDir, dir.Name(), gen.Router, config)
+		gen.WriteSource(workingDir, dir.Name(), gen.Handler, config)
+		gen.WriteSource(workingDir, dir.Name(), gen.Repository, config)
 
 		// Open API
 		openAPI = gen.GenerateOpenAPI(config, gen.YML)
