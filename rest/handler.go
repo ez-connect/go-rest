@@ -16,12 +16,12 @@ const (
 )
 
 type HandlerBase struct {
-	repo RepositoryInterface
+	repo IRepository
 }
 
 ///////////////////////////////////////////////////////////////////
 
-func (h *HandlerBase) Init(db db.DatabaseBase, collection string, repo RepositoryInterface) {
+func (h *HandlerBase) Init(db db.DatabaseBase, collection string, repo IRepository) {
 	if repo == nil {
 		h.repo = &RepositoryBase{}
 	} else {

@@ -14,7 +14,7 @@ type RepositoryBase struct {
 	lifeCycle  LifeCycle
 }
 
-type RepositoryInterface interface {
+type IRepository interface {
 	EnsureIndexs()
 	Init(db db.DatabaseBase, collection string)
 	RegisterLifeCycle(l LifeCycle)

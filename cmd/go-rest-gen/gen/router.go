@@ -7,7 +7,7 @@ import (
 
 var initRoute = `
 func (r *Router) Init(e *echo.Echo, db db.DatabaseBase) {
-	r.Router.Init(e, &r.Handler.Handler)
+	r.Router.Init(e, &r.Handler)
 	r.Handler.Init(db, %s.CollectionName, &r.Repo.Repository)
 }
 
