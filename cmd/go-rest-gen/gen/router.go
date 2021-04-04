@@ -12,9 +12,9 @@ func (r *Router) Init(e *echo.Echo, db db.DatabaseBase) {
 }
 
 // Implement rest.RouterBase
-// func (r *Router) GetRepository() rest.RepositoryInterface {
-// 	return &r.Repo
-// }
+func (r *Router) GetRepository() rest.RepositoryInterface {
+	return &r.Repo
+}
 `
 
 func GenerateRoutes(packageName string, config Config) string {

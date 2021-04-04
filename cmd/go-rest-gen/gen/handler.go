@@ -13,10 +13,8 @@ var find = `func (h *Handler) Find(c echo.Context) error {
 
 var insert = `func (h *Handler) Insert(c echo.Context) error {
 	doc := Model{
-		%s.Model{
-			CreatedAt: core.Now(),
-			UpdatedAt: core.Now(),
-		},
+		CreatedAt: core.Now(),
+		UpdatedAt: core.Now(),
 	}
 	return h.HandlerBase.Insert(c, &doc)
 }
@@ -30,9 +28,7 @@ var findOne = `func (h *Handler) FindOne(c echo.Context) error {
 
 var update = `func (h *Handler) Update(c echo.Context) error {
 	doc := Model{
-		%s.Model{
-			UpdatedAt: core.Now(),
-		},
+		UpdatedAt: core.Now(),
 	}
 	return h.HandlerBase.UpdateOne(c, &doc)
 }
@@ -85,18 +81,18 @@ func GenerateHandlerService(packageName string) string {
 	buf = append(buf, ")\n")
 
 	buf = append(buf, "type Handler struct {")
-	buf = append(buf, fmt.Sprintf("\trest.HandlerBase"))
+	buf = append(buf, "\trest.HandlerBase")
 	buf = append(buf, fmt.Sprintf("\t%s.IHandler", packageName))
 	buf = append(buf, "\tRepo Repository")
 	buf = append(buf, "}")
 
 	// Generate all, although some handlers will not be used
 	// to ignore linting error of imported and not used
-	buf = append(buf, fmt.Sprintf(find, strings.Title(packageName)))
-	buf = append(buf, fmt.Sprintf(insert, strings.Title(packageName)))
-	buf = append(buf, fmt.Sprintf(findOne, strings.Title(packageName)))
-	buf = append(buf, fmt.Sprintf(update, strings.Title(packageName)))
-	buf = append(buf, fmt.Sprintf(delete, strings.Title(packageName)))
+	buf = append(buf, find)
+	buf = append(buf, insert)
+	buf = append(buf, findOne)
+	buf = append(buf, update)
+	buf = append(buf, delete)
 
 	return strings.Join(buf, "\n")
 }
