@@ -83,6 +83,7 @@ type RouteConfig struct {
 	MiddlewareFunc string
 
 	// Permission / Policies here
+	Policy string
 }
 
 type RouteGroup struct {
