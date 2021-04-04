@@ -87,6 +87,7 @@ type RouteConfig struct {
 }
 
 type RouteGroup struct {
+	Name           string
 	Path           string
 	MiddlewareFunc string
 	Children       []RouteConfig

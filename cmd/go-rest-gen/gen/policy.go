@@ -8,7 +8,12 @@ import (
 func GeneratePolicy(config []Config) string {
 	buf := []string{}
 	for _, c := range config {
+		col := strings.ToLower(c.Collection)
 		for _, rs := range c.Routes {
+			g := col
+			if rs.Name != "" {
+				g += "_" + rs.Name
+			}
 			for _, r := range rs.Children {
 				p := r.Policy
 				if p == "" {
@@ -19,9 +24,10 @@ func GeneratePolicy(config []Config) string {
 						p = "delete"
 					}
 				}
-				buf = append(buf, fmt.Sprintf("p, %s_%s, %s%s, %s", strings.ToLower(c.Collection), p, rs.Path, r.Path, r.Method))
+				buf = append(buf, fmt.Sprintf("p, %s_%s, %s%s, %s", g, p, rs.Path, r.Path, r.Method))
 			}
 		}
+		buf = append(buf, "")
 	}
 	return strings.Join(buf, "\n")
 }

@@ -55,6 +55,7 @@ func GenerateRoutes(packageName string, config Config) string {
 				)
 			}
 		}
+		buf = append(buf, "")
 	}
 
 	buf = append(buf, "}\n")
