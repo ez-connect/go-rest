@@ -86,6 +86,9 @@ func main() {
 		openAPI = gen.GenerateOpenAPI(config, gen.YML)
 	}
 
+	// Policy
+	gen.WritePolicy(workingDir, configs)
+
 	// Write constants
 	gen.WriteConstants(workingDir, configs)
 

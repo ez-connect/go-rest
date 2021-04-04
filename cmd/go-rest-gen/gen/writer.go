@@ -97,3 +97,20 @@ func WriteConstants(workingDir string, configs []Config) {
 		log.Fatal(err)
 	}
 }
+
+func WritePolicy(workingDir string, configs []Config) {
+	filename := fmt.Sprintf("%s/generated/policy.csv", workingDir)
+	fmt.Println(filename)
+
+	f, err := os.Create(filename)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer f.Close()
+
+	_, err = f.WriteString(GeneratePolicy(configs))
+	if err != nil {
+		log.Fatal(err)
+	}
+}
